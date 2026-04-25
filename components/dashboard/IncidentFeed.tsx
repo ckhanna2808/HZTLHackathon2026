@@ -1,18 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { LiveWatchIncident } from "@/lib/types";
 import { IncidentCard } from "./IncidentCard";
-import { CheckCircle2, Bell, Rss } from "lucide-react";
+import { ArrowDownUp, Bell, Rss } from "lucide-react";
 
 interface Props {
   incidents: LiveWatchIncident[];
   isLoading?: boolean;
 }
 
+type SortOrder = "default" | "newest";
+
+function sortIncidents(list: LiveWatchIncident[], order: SortOrder) {
+  if (order === "default") return list;
+  return [...list].sort(
+    (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+  );
+}
+
 export function IncidentFeed({ incidents, isLoading }: Props) {
-  const active = incidents.filter((i) => i.status !== "resolved");
-  const scheduled = incidents.filter((i) => i.status === "scheduled");
-  const resolved = incidents.filter((i) => i.status === "resolved");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("default");
+
+  const active    = sortIncidents(incidents.filter((i) => i.status !== "resolved"), sortOrder);
+  const resolved  = sortIncidents(incidents.filter((i) => i.status === "resolved"), sortOrder);
 
   return (
     <div
@@ -27,16 +38,17 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           display: "flex",
           alignItems: "center",
           gap: 8,
+          flexWrap: "wrap",
         }}
       >
         <Bell size={14} color="var(--accent-primary)" />
         <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
           Incident Feed
         </span>
+
         {active.length > 0 && (
           <span
             style={{
-              marginLeft: "auto",
               background: "var(--status-red)",
               color: "#fff",
               fontSize: 11,
@@ -61,6 +73,35 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
             {active.length} Live
           </span>
         )}
+
+        {/* Sort toggle */}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
+          {(["default", "newest"] as SortOrder[]).map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setSortOrder(opt)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                padding: "3px 9px",
+                borderRadius: 6,
+                border: `1px solid ${sortOrder === opt ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                background: sortOrder === opt ? "var(--accent-primary-dim)" : "transparent",
+                color: sortOrder === opt ? "var(--accent-primary)" : "var(--text-muted)",
+                fontSize: 10,
+                fontWeight: 600,
+                cursor: "pointer",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                transition: "all 0.15s",
+              }}
+            >
+              {opt === "newest" && <ArrowDownUp size={9} />}
+              {opt === "default" ? "Default" : "Newest First"}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Feed content */}
@@ -77,53 +118,25 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
         {isLoading && incidents.length === 0 && (
           <>
             {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="shimmer"
-                style={{ height: 80, borderRadius: 10 }}
-              />
+              <div key={i} className="shimmer" style={{ height: 80, borderRadius: 10 }} />
             ))}
           </>
         )}
 
-        {!isLoading && incidents.length === 0 && (
-          <AllClearState />
-        )}
+        {!isLoading && incidents.length === 0 && <AllClearState />}
 
         {/* Active */}
         {active.length > 0 && (
-          <SectionHeader
-            label="Active"
-            count={active.length}
-            color="var(--status-red)"
-          />
+          <SectionHeader label="Active" count={active.length} color="var(--status-red)" />
         )}
         {active.map((inc, i) => (
           <IncidentCard key={inc.id} incident={inc} index={i} />
         ))}
 
-        {/* Scheduled */}
-        {scheduled.length > 0 && (
-          <>
-            <SectionHeader
-              label="Scheduled Maintenance"
-              count={scheduled.length}
-              color="var(--accent-primary)"
-            />
-            {scheduled.map((inc, i) => (
-              <IncidentCard key={inc.id} incident={inc} index={i} />
-            ))}
-          </>
-        )}
-
         {/* Resolved */}
         {resolved.length > 0 && (
           <>
-            <SectionHeader
-              label="Resolved"
-              count={resolved.length}
-              color="var(--status-green)"
-            />
+            <SectionHeader label="Resolved" count={resolved.length} color="var(--status-green)" />
             {resolved.map((inc, i) => (
               <IncidentCard key={inc.id} incident={inc} index={i} />
             ))}
@@ -150,25 +163,11 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
   );
 }
 
-function SectionHeader({
-  label,
-  count,
-  color,
-}: {
-  label: string;
-  count: number;
-  color: string;
-}) {
+// ─── Section header ───────────────────────────────────────────────────────────
+
+function SectionHeader({ label, count, color }: { label: string; count: number; color: string }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        paddingBottom: 4,
-        marginTop: 4,
-      }}
-    >
+    <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 4, marginTop: 4 }}>
       <div style={{ height: 1, flex: 1, background: "var(--border-subtle)" }} />
       <span
         style={{
@@ -197,6 +196,8 @@ function SectionHeader({
   );
 }
 
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
 function AllClearState() {
   return (
     <div
@@ -223,12 +224,10 @@ function AllClearState() {
           animation: "float 3s ease-in-out infinite",
         }}
       >
-        <CheckCircle2 size={24} color="var(--status-green)" />
+        <Bell size={24} color="var(--status-green)" />
       </div>
       <div>
-        <div
-          style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}
-        >
+        <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
           All Clear
         </div>
         <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>

@@ -25,14 +25,12 @@ const PLATFORM_ICONS: Record<string, React.ReactNode> = {
   sitecore: <Layers size={20} />,
 };
 
-const PLATFORM_COLORS: Record<string, string> = {
-  vercel: "#fff",
-  netlify: "#00c7b7",
-  github: "#e8eaed",
-  cloudflare: "#f6821f",
-  npm: "#cb3837",
-  sitecore: "#eb1f1f",
-};
+/** Returns the CSS variable for a platform's brand colour, e.g. "var(--platform-vercel)".
+ *  The actual colour values switch automatically with [data-theme] in globals.css.
+ */
+function platformColorVar(platform: string): string {
+  return `var(--platform-${platform}, var(--text-secondary))`;
+}
 
 const STATUS_CARD_CLASS: Record<SystemStatus, string> = {
   operational: "card-operational",
@@ -66,14 +64,14 @@ interface Props {
 export function PlatformCard({ platform, animationDelay = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const icon = PLATFORM_ICONS[platform.platform];
-  const color = PLATFORM_COLORS[platform.platform] ?? "#fff";
+  const colorVar = platformColorVar(platform.platform);
   const statusColor = STATUS_COLOR[platform.status] ?? STATUS_COLOR.unknown;
   const cardClass = STATUS_CARD_CLASS[platform.status] ?? "";
   const hasIncidents = platform.activeIncidents.length > 0;
 
   const lastUpdated = platform.updatedAt
     ? formatDistanceToNow(new Date(platform.updatedAt), { addSuffix: true })
-    : "—";
+    : "-";
 
   return (
     <div
@@ -95,13 +93,14 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
             width: 44,
             height: 44,
             borderRadius: 10,
-            background: `${color}14`,
-            border: `1px solid ${color}28`,
+            background: `color-mix(in srgb, ${colorVar} 9%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${colorVar} 18%, transparent)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color,
+            color: colorVar,
             flexShrink: 0,
+            transition: "background 220ms ease, border-color 220ms ease, color 220ms ease",
           }}
         >
           {icon}
@@ -166,7 +165,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
       >
         <StatCell
           label="Components"
-          value={platform.components.length || "—"}
+          value={platform.components.length || "-"}
         />
         <StatCell
           label="Incidents"
@@ -205,9 +204,6 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         <div
           style={{
             marginTop: 12,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
             animation: "slide-up 0.2s ease-out both",
           }}
           onClick={(e) => e.stopPropagation()}
@@ -219,49 +215,67 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               color: "var(--text-muted)",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             Components
           </div>
-          {platform.components.slice(0, 12).map((c) => {
-            const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
-            return (
-              <div
-                key={c.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "4px 8px",
-                  borderRadius: 6,
-                  background: "var(--bg-glass)",
-                  fontSize: 12,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: compColor,
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ flex: 1, color: "var(--text-secondary)" }}>{c.name}</span>
-                <span style={{ fontSize: 10, color: compColor, fontWeight: 600 }}>
-                  {STATUS_LABEL[c.status]}
-                </span>
-              </div>
-            );
-          })}
-          {platform.components.length > 12 && (
-            <div style={{ fontSize: 11, color: "var(--text-muted)", paddingLeft: 8 }}>
-              +{platform.components.length - 12} more components
-            </div>
-          )}
+          {/* Scrollable - shows ALL components, non-operational sorted first */}
+          <div
+            style={{
+              maxHeight: 220,
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+              paddingRight: 2,
+            }}
+          >
+            {[...platform.components]
+              .sort((a, b) => {
+                // Non-operational first
+                const order = { major_outage: 0, partial_outage: 1, degraded_performance: 2, operational: 3, unknown: 4 };
+                return (order[a.status] ?? 4) - (order[b.status] ?? 4);
+              })
+              .map((c) => {
+                const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
+                return (
+                  <div
+                    key={c.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "4px 8px",
+                      borderRadius: 6,
+                      background: "var(--bg-glass)",
+                      fontSize: 12,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: compColor,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ flex: 1, color: "var(--text-secondary)" }}>{c.name}</span>
+                    <span style={{ fontSize: 10, color: compColor, fontWeight: 600 }}>
+                      {STATUS_LABEL[c.status]}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, textAlign: "right" }}>
+            {platform.components.length} components total
+          </div>
         </div>
       )}
+
 
       {/* Expand toggle */}
       <div

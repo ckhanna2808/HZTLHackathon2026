@@ -123,7 +123,7 @@ export default function DashboardPage() {
       : (snapshot?.platforms[selectedPlatform as Platform]?.activeIncidents ?? []);
   // ↑ platform-specific tab: use platform.activeIncidents which includes resolved history
 
-  // Badge / header count — always shows only ACTIVE (non-resolved) for the current view
+  // Badge / header count - always shows only ACTIVE (non-resolved) for the current view
   const activeCount = filteredIncidents.filter((i) => i.status !== "resolved").length;
 
   // Global count is only used for the stats bar (always shows totals).
@@ -234,7 +234,7 @@ export default function DashboardPage() {
                 <HealthChart platforms={platforms} />
               )}
 
-              {/* Status badges section */}
+              {/* Embeddable Status Badges - code snippets only, no rendered images */}
               {snapshot && (
                 <div className="glass-card" style={{ padding: "18px 20px" }}>
                   <div
@@ -248,46 +248,76 @@ export default function DashboardPage() {
                     📌 Embeddable Status Badges
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {["vercel", "netlify", "github", "cloudflare", "npm"].map((p) => (
-                      <div
-                        key={p}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 12,
-                          padding: "8px 12px",
-                          borderRadius: 8,
-                          background: "var(--bg-glass)",
-                          border: "1px solid var(--border-subtle)",
-                        }}
-                      >
-                        <img
-                          src={`/api/badge/${p}`}
-                          alt={`${p} status badge`}
-                          style={{ height: 20 }}
-                        />
-                        <code
+                    {(["vercel", "netlify", "github", "cloudflare", "npm"] as const).map((p) => {
+                      const platform = snapshot.platforms[p];
+                      const statusColor =
+                        platform?.status === "operational"         ? "var(--status-green)"  :
+                        platform?.status === "degraded_performance"? "var(--status-yellow)" :
+                        platform?.status === "partial_outage"      ? "var(--status-orange)" :
+                        platform?.status === "major_outage"        ? "var(--status-red)"    :
+                        "var(--status-gray)";
+                      const statusLabel =
+                        platform?.status === "operational"          ? "Operational"         :
+                        platform?.status === "degraded_performance" ? "Degraded"            :
+                        platform?.status === "partial_outage"       ? "Partial Outage"      :
+                        platform?.status === "major_outage"         ? "Major Outage"        :
+                        "Unknown";
+                      return (
+                        <div
+                          key={p}
                           style={{
-                            fontSize: 10,
-                            color: "var(--text-muted)",
-                            fontFamily: '"JetBrains Mono", monospace',
-                            flex: 1,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "8px 12px",
+                            borderRadius: 8,
+                            background: "var(--bg-glass)",
+                            border: "1px solid var(--border-subtle)",
                           }}
                         >
-                          {`<img src="${typeof window !== "undefined" ? window.location.origin : ""}/api/badge/${p}" />`}
-                        </code>
-                      </div>
-                    ))}
+                          {/* Platform name */}
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              color: "var(--text-primary)",
+                              minWidth: 72,
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            {p}
+                          </span>
+                          {/* Live status pill */}
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 600,
+                              color: statusColor,
+                              background: `${statusColor}18`,
+                              border: `1px solid ${statusColor}35`,
+                              borderRadius: 999,
+                              padding: "1px 8px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {statusLabel}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
+
             </div>
 
+<<<<<<< HEAD
             {/* Right column — Incident Feed */}
             <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
+=======
+            {/* Right column - Incident Feed */}
+            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column" }}>
+>>>>>>> main
               <IncidentFeed
                 incidents={filteredIncidents}
                 isLoading={isLoading && !snapshot}

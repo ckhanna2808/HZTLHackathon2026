@@ -17,6 +17,9 @@ import {
   Flame,
   ShieldAlert,
   ExternalLink,
+  Sparkles,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
 interface SitecoreProductStatusEnriched {
@@ -81,15 +84,15 @@ const PRIORITY_LABEL: Record<string, { label: string; color: string; bg: string;
 };
 
 const PRODUCT_ABBR: Record<string, string> = {
-  "ai":            "AI",
-  "content-hub":   "CH",
-  "search":        "SRH",
-  "cdp":           "CDP",
-  "personalize":   "PRS",
-  "send":          "SND",
+  "ai": "AI",
+  "content-hub": "CH",
+  "search": "SRH",
+  "cdp": "CDP",
+  "personalize": "PRS",
+  "send": "SND",
   "managed-cloud": "MCS",
-  "cloud-portal":  "CLD",
-  "ordercloud":    "ORC",
+  "cloud-portal": "CLD",
+  "ordercloud": "ORC",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -150,9 +153,51 @@ function HistoryBar({ incidents }: { incidents: LiveWatchIncident[] }) {
 
 // ─── Active Incident Card (prominent banner) ──────────────────────────────────
 
+interface SummaryState {
+  status: "idle" | "loading" | "ready" | "error";
+  text?: string;
+  error?: string;
+}
+
 function ActiveIncidentBanner({ incident }: { incident: LiveWatchIncident }) {
   const cfg = PRIORITY_LABEL[incident.impact] ?? PRIORITY_LABEL.minor;
   const isSerious = incident.impact === "critical" || incident.impact === "major";
+
+  const [summary, setSummary] = useState<SummaryState>({ status: "idle" });
+
+  async function generateSummary() {
+    if (summary.status === "loading") return;
+    setSummary({ status: "loading" });
+    try {
+      const res = await fetch("/api/incident-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          incidentUrl: incident.url,
+          title: incident.title,
+          description: incident.description,
+          impact: incident.impact,
+          status: incident.status,
+          startedAt: incident.startedAt,
+          affectedComponents: incident.affectedComponents,
+          affectedRegions: incident.affectedRegions,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? `Request failed (${res.status})`);
+      }
+
+      const data: { summary?: string } = await res.json();
+      const text = (data.summary ?? "").trim();
+      if (!text) throw new Error("Empty summary returned");
+      setSummary({ status: "ready", text });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to summarize";
+      setSummary({ status: "error", error: message });
+    }
+  }
 
   return (
     <div
@@ -267,7 +312,7 @@ function ActiveIncidentBanner({ incident }: { incident: LiveWatchIncident }) {
         )}
 
         {/* Footer row: date + link */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
           <Clock size={10} color="var(--text-muted)" />
           <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
             Started: {formatDate(incident.startedAt)}
@@ -280,12 +325,51 @@ function ActiveIncidentBanner({ incident }: { incident: LiveWatchIncident }) {
               </span>
             </>
           )}
+
+          <button
+            type="button"
+            onClick={generateSummary}
+            disabled={summary.status === "loading"}
+            title={
+              summary.status === "ready"
+                ? "Regenerate AI summary"
+                : "Summarize this incident with Claude"
+            }
+            style={{
+              marginLeft: "auto",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 10,
+              fontWeight: 600,
+              color: cfg.color,
+              background: "transparent",
+              border: `1px solid ${cfg.color}40`,
+              borderRadius: 999,
+              padding: "3px 9px",
+              cursor: summary.status === "loading" ? "wait" : "pointer",
+              opacity: summary.status === "loading" ? 0.7 : 1,
+              transition: "all 0.15s ease",
+            }}
+          >
+            {summary.status === "loading" ? (
+              <>
+                <Loader2 size={10} style={{ animation: "spin 0.9s linear infinite" }} />
+                Summarizing...
+              </>
+            ) : (
+              <>
+                <Sparkles size={10} />
+                Summary
+              </>
+            )}
+          </button>
+
           <a
             href={incident.url}
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              marginLeft: "auto",
               display: "inline-flex",
               alignItems: "center",
               gap: 4,
@@ -298,6 +382,81 @@ function ActiveIncidentBanner({ incident }: { incident: LiveWatchIncident }) {
             Details <ExternalLink size={9} />
           </a>
         </div>
+
+        {/* AI summary surface */}
+        {summary.status !== "idle" && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: "8px 10px",
+              borderRadius: 8,
+              background: "var(--bg-glass)",
+              border: `1px dashed ${cfg.color}55`,
+              fontSize: 11,
+              lineHeight: 1.5,
+              color: "var(--text-primary)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                marginBottom: summary.status === "loading" ? 0 : 4,
+                fontSize: 9,
+                fontWeight: 700,
+                color: cfg.color,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              <Sparkles size={9} />
+            </div>
+
+            {summary.status === "loading" && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-muted)" }}>
+                <Loader2 size={11} style={{ animation: "spin 0.9s linear infinite" }} />
+                Reading incident page and drafting summary...
+              </div>
+            )}
+
+            {summary.status === "ready" && summary.text && (
+              <div style={{ color: "var(--text-primary)" }}>{summary.text}</div>
+            )}
+
+            {summary.status === "error" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: "var(--status-red, #ef4444)",
+                }}
+              >
+                <AlertTriangle size={11} />
+                <span style={{ flex: 1 }}>
+                  {summary.error ?? "Could not generate summary."}
+                </span>
+                <button
+                  type="button"
+                  onClick={generateSummary}
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: cfg.color,
+                    background: "transparent",
+                    border: `1px solid ${cfg.color}40`,
+                    borderRadius: 6,
+                    padding: "2px 7px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -312,7 +471,7 @@ export function SitecoreBreakdown({ products }: Props) {
   const allOperational = entries.every((p) => p.status === "operational");
   const degradedCount = entries.filter((p) => p.status !== "operational").length;
 
-  // Collect all active incidents — this is what the user was asking about
+  // Collect all active incidents - this is what the user was asking about
   const activeIncidents = entries
     .flatMap((p) => (p.incident ? [p.incident] : []))
     .filter((inc, idx, arr) => arr.findIndex((x) => x.id === inc.id) === idx) // deduplicate
@@ -482,7 +641,7 @@ export function SitecoreBreakdown({ products }: Props) {
                     {history.length === 0 ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--status-green)", fontSize: 12 }}>
                         <CheckCircle size={13} />
-                        No incidents recorded — 100% uptime
+                        No incidents recorded - 100% uptime
                       </div>
                     ) : (
                       <>
@@ -503,10 +662,10 @@ export function SitecoreBreakdown({ products }: Props) {
                               {inc.status === "resolved"
                                 ? <CheckCircle size={11} color="var(--status-green)" style={{ marginTop: 1, flexShrink: 0 }} />
                                 : inc.impact === "critical"
-                                ? <Flame size={11} color="var(--status-red)" style={{ marginTop: 1, flexShrink: 0 }} />
-                                : inc.impact === "major"
-                                ? <AlertTriangle size={11} color="var(--status-yellow)" style={{ marginTop: 1, flexShrink: 0 }} />
-                                : <Info size={11} color="#3b82f6" style={{ marginTop: 1, flexShrink: 0 }} />}
+                                  ? <Flame size={11} color="var(--status-red)" style={{ marginTop: 1, flexShrink: 0 }} />
+                                  : inc.impact === "major"
+                                    ? <AlertTriangle size={11} color="var(--status-yellow)" style={{ marginTop: 1, flexShrink: 0 }} />
+                                    : <Info size={11} color="#3b82f6" style={{ marginTop: 1, flexShrink: 0 }} />}
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                   {inc.title}
