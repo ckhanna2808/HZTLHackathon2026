@@ -10,7 +10,6 @@ import {
   Layers,
   LayoutGrid,
   Bell,
-  Clock,
   ChevronRight,
 } from "lucide-react";
 
@@ -146,14 +145,6 @@ export function Sidebar({
           )}
         </button>
 
-        <button
-          className="sidebar-nav-item"
-          style={{ width: "100%", border: "none", textAlign: "left" }}
-          onClick={() => onSelect("history")}
-        >
-          <Clock size={14} />
-          <span>History</span>
-        </button>
 
         {/* Global health score */}
         <div

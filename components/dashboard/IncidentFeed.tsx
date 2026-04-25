@@ -144,7 +144,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
         }}
       >
         <Rss size={11} />
-        <span>Auto-refreshes every 30s</span>
+        <span>Auto-refreshes every 60s</span>
       </div>
     </div>
   );
