@@ -124,7 +124,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
           >
             <span
               style={{
-                fontSize: 15,
+                fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
@@ -140,7 +140,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                 </span>
                 <span
                   style={{
-                    fontSize: 15,
+                    fontSize: 12,
                     color: "var(--text-muted)",
                     fontWeight: 500,
                   }}
@@ -154,9 +154,9 @@ export function IncidentCard({ incident, index = 0 }: Props) {
           {/* Title */}
           <div
             style={{
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: 600,
-              color: "var(--text-primary)",
+              color: "var(--text-muted)",
               lineHeight: 1.3,
               overflow: "hidden",
               display: "-webkit-box",
@@ -177,7 +177,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
               flexWrap: "wrap",
             }}
           >
-            <span style={{ fontSize: 15, color: "var(--text-muted)" }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
               {timeAgo}
             </span>
             <span
@@ -187,7 +187,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                 gap: 3,
                 padding: "1px 7px",
                 borderRadius: 999,
-                fontSize: 15,
+                fontSize: 12,
                 fontWeight: 600,
                 color: statusInfo.color,
                 background: `${statusInfo.color}15`,
@@ -201,7 +201,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                 display: "inline-flex",
                 padding: "1px 7px",
                 borderRadius: 999,
-                fontSize: 15,
+                fontSize: 12,
                 fontWeight: 600,
                 color: config.color,
                 background: config.bg,
@@ -253,7 +253,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
           {incident.description && (
             <p
               style={{
-                fontSize: 15,
+                fontSize: 12,
                 color: "var(--text-secondary)",
                 lineHeight: 1.5,
                 margin: 0,
@@ -271,7 +271,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                   style={{
                     padding: "2px 7px",
                     borderRadius: 4,
-                    fontSize: 15,
+                    fontSize: 12,
                     background: "var(--bg-glass)",
                     border: "1px solid var(--border-subtle)",
                     color: "var(--text-secondary)",

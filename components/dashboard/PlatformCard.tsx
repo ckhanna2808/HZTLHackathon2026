@@ -111,9 +111,9 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: 700,
-              color: "var(--text-primary)",
+              color: "var(--text-muted)",
               letterSpacing: "-0.01em",
               whiteSpace: "nowrap",
               overflow: "hidden",
@@ -124,7 +124,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           </div>
           <div
             style={{
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: 500,
               color: statusColor,
               marginTop: 2,
@@ -191,7 +191,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
             borderRadius: 8,
             background: "rgba(239,68,68,0.08)",
             border: "1px solid rgba(239,68,68,0.2)",
-            fontSize: 15,
+            fontSize: 12,
             color: "var(--status-red)",
             display: "flex",
             alignItems: "center",
@@ -216,9 +216,8 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         >
           <div
             style={{
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: 700,
-              textTransform: "uppercase",
               letterSpacing: "0.08em",
               color: "var(--text-muted)",
               marginBottom: 6,
@@ -238,7 +237,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
                   padding: "4px 8px",
                   borderRadius: 6,
                   background: "var(--bg-glass)",
-                  fontSize: 15,
+                  fontSize: 12,
                 }}
               >
                 <span
@@ -264,7 +263,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           {platform.components.length > 12 && (
             <div
               style={{
-                fontSize: 15,
+                fontSize: 12,
                 color: "var(--text-muted)",
                 paddingLeft: 8,
               }}

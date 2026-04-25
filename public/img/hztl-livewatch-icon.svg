@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="HZTL LiveWatch icon">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0EA5E9"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bg)"/>
+  <path d="M 18 68 L 38 68 L 47 44 L 60 96 L 73 48 L 84 80 L 94 68 L 110 68"
+        stroke="#FFFFFF" stroke-width="5" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="100" cy="26" r="8" fill="#EF4444"/>
+  <circle cx="100" cy="26" r="8" fill="#EF4444" opacity="0.45">
+    <animate attributeName="r" values="8;16;8" dur="1.6s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.45;0;0.45" dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+</svg>

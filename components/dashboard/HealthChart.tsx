@@ -73,10 +73,9 @@ export function HealthChart({ platforms }: Props) {
         <TrendingUp size={15} color="var(--accent-primary)" />
         <span
           style={{
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: 700,
-            color: "var(--text-primary)",
-            textTransform: "uppercase",
+            color: "var(--text-muted)",
           }}
         >
           Platform Health Overview
@@ -84,7 +83,7 @@ export function HealthChart({ platforms }: Props) {
         <span
           style={{
             marginLeft: "auto",
-            fontSize: 15,
+            fontSize: 12,
             color: "var(--text-muted)",
           }}
         >
@@ -106,13 +105,13 @@ export function HealthChart({ platforms }: Props) {
           />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 15, fill: "var(--text-muted)", fontWeight: 500 }}
+            tick={{ fontSize: 12, fill: "var(--text-muted)", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fontSize: 15, fill: "var(--text-muted)" }}
+            tick={{ fontSize: 12, fill: "var(--text-muted)" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => `${v}%`}
@@ -122,7 +121,7 @@ export function HealthChart({ platforms }: Props) {
               background: "var(--bg-secondary)",
               border: "1px solid var(--border-default)",
               borderRadius: 10,
-              fontSize: 15,
+              fontSize: 12,
               color: "var(--text-primary)",
               boxShadow: "var(--shadow-elevated)",
             }}
@@ -179,7 +178,7 @@ export function HealthChart({ platforms }: Props) {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              fontSize: 15,
+              fontSize: 12,
               color: "var(--text-muted)",
             }}
           >

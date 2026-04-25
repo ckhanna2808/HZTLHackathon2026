@@ -4,7 +4,6 @@ import { useState } from "react";
 import { LiveWatchIncident } from "@/lib/types";
 import { IncidentCard } from "./IncidentCard";
 import { ArrowDownUp, Bell, Rss } from "lucide-react";
-import { Reveal } from "@/components/ui/Reveal";
 
 interface Props {
   incidents: LiveWatchIncident[];
@@ -51,9 +50,9 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
         <Bell size={14} color="var(--accent-primary)" />
         <span
           style={{
-            fontSize: 15,
+            fontSize: 12,
             fontWeight: 700,
-            color: "var(--text-primary)",
+            color: "var(--text-muted)",
           }}
         >
           Incident Feed
@@ -64,7 +63,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
             style={{
               background: "var(--status-red)",
               color: "#fff",
-              fontSize: 15,
+              fontSize: 12,
               fontWeight: 700,
               borderRadius: 999,
               padding: "2px 8px",
@@ -157,9 +156,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           />
         )}
         {active.map((inc, i) => (
-          <Reveal key={inc.id} delayMs={i * 55}>
-            <IncidentCard incident={inc} index={i} />
-          </Reveal>
+          <IncidentCard key={inc.id} incident={inc} index={i} />
         ))}
 
         {/* Resolved */}
@@ -171,9 +168,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
               color="var(--status-green)"
             />
             {resolved.map((inc, i) => (
-              <Reveal key={inc.id} delayMs={i * 55}>
-                <IncidentCard incident={inc} index={i} />
-              </Reveal>
+              <IncidentCard key={inc.id} incident={inc} index={i} />
             ))}
           </>
         )}
@@ -187,7 +182,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           display: "flex",
           alignItems: "center",
           gap: 6,
-          fontSize: 15,
+          fontSize: 12,
           color: "var(--text-muted)",
         }}
       >
@@ -222,7 +217,7 @@ function SectionHeader({
       <div style={{ height: 1, flex: 1, background: "var(--border-subtle)" }} />
       <span
         style={{
-          fontSize: 15,
+          fontSize: 12,
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.08em",
