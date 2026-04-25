@@ -61,7 +61,16 @@ export function Sidebar({
           borderBottom: "1px solid var(--border-subtle)",
         }}
       >
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 12 }}>
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            color: "var(--text-muted)",
+            textTransform: "uppercase",
+            marginBottom: 12,
+          }}
+        >
           Navigation
         </div>
 
@@ -93,13 +102,25 @@ export function Sidebar({
 
       {/* Platforms */}
       <div style={{ padding: "12px 0", flex: 1 }}>
-        <div style={{ padding: "0 16px 8px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "var(--text-muted)", textTransform: "uppercase" }}>
+        <div
+          style={{
+            padding: "0 16px 8px",
+            fontSize: 16,
+
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            color: "var(--text-muted)",
+            textTransform: "uppercase",
+          }}
+        >
           Platforms
         </div>
         {platforms
           .filter((p) => p.id !== "all")
           .map((p) => {
-            const statusColor = p.status ? STATUS_COLOR[p.status] ?? STATUS_COLOR.unknown : "var(--status-gray)";
+            const statusColor = p.status
+              ? (STATUS_COLOR[p.status] ?? STATUS_COLOR.unknown)
+              : "var(--status-gray)";
             const isActive = selected === p.id;
             return (
               <button
@@ -108,7 +129,13 @@ export function Sidebar({
                 className={`sidebar-nav-item ${isActive ? "active" : ""}`}
                 style={{ width: "100%", border: "none", textAlign: "left" }}
               >
-                <span style={{ color: isActive ? "var(--accent-primary)" : "var(--text-muted)" }}>
+                <span
+                  style={{
+                    color: isActive
+                      ? "var(--accent-primary)"
+                      : "var(--text-muted)",
+                  }}
+                >
                   {PLATFORM_ICONS[p.id]}
                 </span>
                 <span style={{ flex: 1 }}>{p.label}</span>
@@ -128,8 +155,23 @@ export function Sidebar({
       </div>
 
       {/* Bottom section */}
-      <div style={{ padding: "12px 0 16px", borderTop: "1px solid var(--border-subtle)" }}>
-        <div style={{ padding: "0 16px 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "var(--text-muted)", textTransform: "uppercase" }}>
+      <div
+        style={{
+          padding: "12px 0 16px",
+          borderTop: "1px solid var(--border-subtle)",
+        }}
+      >
+        <div
+          style={{
+            padding: "0 16px 10px",
+            fontSize: 16,
+
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            color: "var(--text-muted)",
+            textTransform: "uppercase",
+          }}
+        >
           Quick Links
         </div>
 
@@ -141,10 +183,12 @@ export function Sidebar({
           <Bell size={14} />
           <span>Incidents</span>
           {activeIncidentCount > 0 && (
-            <ChevronRight size={12} style={{ marginLeft: "auto", color: "var(--text-muted)" }} />
+            <ChevronRight
+              size={12}
+              style={{ marginLeft: "auto", color: "var(--text-muted)" }}
+            />
           )}
         </button>
-
 
         {/* Global health score */}
         <div
@@ -156,15 +200,36 @@ export function Sidebar({
             border: "1px solid var(--border-subtle)",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 16,
+
+                color: "var(--text-muted)",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
               Global Health
             </span>
             <span
               style={{
                 fontSize: 15,
                 fontWeight: 800,
-                color: globalHealth >= 90 ? "var(--status-green)" : globalHealth >= 70 ? "var(--status-yellow)" : "var(--status-red)",
+                color:
+                  globalHealth >= 90
+                    ? "var(--status-green)"
+                    : globalHealth >= 70
+                      ? "var(--status-yellow)"
+                      : "var(--status-red)",
               }}
             >
               {globalHealth}%
@@ -183,16 +248,19 @@ export function Sidebar({
                 height: "100%",
                 width: `${globalHealth}%`,
                 borderRadius: 2,
-                background: globalHealth >= 90
-                  ? "var(--status-green)"
-                  : globalHealth >= 70
-                  ? "var(--status-yellow)"
-                  : "var(--status-red)",
+                background:
+                  globalHealth >= 90
+                    ? "var(--status-green)"
+                    : globalHealth >= 70
+                      ? "var(--status-yellow)"
+                      : "var(--status-red)",
                 transition: "width 0.8s ease",
               }}
             />
           </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 5 }}>
+          <div
+            style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 5 }}
+          >
             Across all monitored platforms
           </div>
         </div>

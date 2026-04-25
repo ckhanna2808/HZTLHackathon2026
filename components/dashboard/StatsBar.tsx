@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DashboardStats } from "@/lib/types";
-import { Activity, AlertTriangle, Clock, Layers, Shield, Zap } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  Clock,
+  Layers,
+  Shield,
+  Zap,
+} from "lucide-react";
 
 interface Props {
   stats: DashboardStats;
@@ -10,21 +17,29 @@ interface Props {
 }
 
 export function StatsBar({ stats, activeIncidentCount }: Props) {
-  // Live clock - ticks every second so the "Next Poll" countdown actually counts down.
-  // Without this, Date.now() is evaluated once at render and never updates.
-  const [tick, setTick] = useState(0);
+  const [nowMs, setNowMs] = useState<number | null>(null);
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(interval);
+    const tick = () => setNowMs(Date.now());
+    const init = window.setTimeout(tick, 0);
+    const interval = window.setInterval(tick, 1000);
+    return () => {
+      window.clearTimeout(init);
+      window.clearInterval(interval);
+    };
   }, []);
 
-  const healthPct = Math.round((stats.operationalCount / stats.totalPlatforms) * 100);
+  const healthPct = Math.round(
+    (stats.operationalCount / stats.totalPlatforms) * 100,
+  );
   const displayActiveCount = activeIncidentCount ?? stats.activeIncidentCount;
 
-  // Countdown derived from live clock (tick forces re-evaluation every second)
-  const secondsToNextPoll = stats.nextPollAt
-    ? Math.max(0, Math.floor((new Date(stats.nextPollAt).getTime() - Date.now()) / 1000))
-    : null;
+  const secondsToNextPoll = useMemo(() => {
+    if (!stats.nextPollAt || nowMs == null) return null;
+    return Math.max(
+      0,
+      Math.floor((new Date(stats.nextPollAt).getTime() - nowMs) / 1000),
+    );
+  }, [stats.nextPollAt, nowMs]);
 
   const items = [
     {
@@ -51,7 +66,9 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
       value: stats.incidentsToday === 0 ? "None" : stats.incidentsToday,
       sub: "Total detected",
       color:
-        stats.incidentsToday === 0 ? "var(--status-green)" : "var(--status-yellow)",
+        stats.incidentsToday === 0
+          ? "var(--status-green)"
+          : "var(--status-yellow)",
     },
     {
       icon: <Zap size={15} />,
@@ -72,8 +89,8 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
         healthPct >= 90
           ? "var(--status-green)"
           : healthPct >= 70
-          ? "var(--status-yellow)"
-          : "var(--status-red)",
+            ? "var(--status-yellow)"
+            : "var(--status-red)",
     },
     {
       icon: <Clock size={15} />,
@@ -83,13 +100,10 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
       sub: "Polling interval",
       color:
         secondsToNextPoll !== null && secondsToNextPoll <= 10
-          ? "var(--status-yellow)"   // turns yellow in last 10s
-          : "var(--accent-secondary)",
+          ? "var(--status-yellow)" // turns yellow in last 10s
+          : "var(--accent-cyan)",
     },
   ];
-
-  // Suppress unused-variable lint for tick - it's only used to force re-renders
-  void tick;
 
   return (
     <div
@@ -118,11 +132,11 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
             {item.icon}
             <span
               style={{
-                fontSize: 10,
+                fontSize: 15,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.07em",
-                color: "var(--text-muted)",
+                color: "var(--text-primary)",
               }}
             >
               {item.label}
@@ -136,12 +150,18 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
               lineHeight: 1,
               letterSpacing: "-0.02em",
               marginBottom: 2,
-              fontVariantNumeric: "tabular-nums",  // prevents layout shift as digits change
+              fontVariantNumeric: "tabular-nums", // prevents layout shift as digits change
             }}
           >
             {item.value}
           </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 500 }}>
+          <div
+            style={{
+              fontSize: 15,
+              color: "var(--text-muted)",
+              fontWeight: 500,
+            }}
+          >
             {item.sub}
           </div>
         </div>

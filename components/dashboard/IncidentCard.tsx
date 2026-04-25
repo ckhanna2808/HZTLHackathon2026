@@ -69,7 +69,8 @@ function platformColorVar(source: string): string {
 export function IncidentCard({ incident, index = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const config = IMPACT_CONFIG[incident.impact] ?? IMPACT_CONFIG.none;
-  const statusInfo = STATUS_LABELS[incident.status] ?? STATUS_LABELS.investigating;
+  const statusInfo =
+    STATUS_LABELS[incident.status] ?? STATUS_LABELS.investigating;
   const platformColor = platformColorVar(incident.source);
   const isResolved = incident.status === "resolved";
 
@@ -103,16 +104,27 @@ export function IncidentCard({ incident, index = 0 }: Props) {
             flexShrink: 0,
           }}
         >
-          {incident.status === "scheduled" ? <Calendar size={14} /> : config.icon}
+          {incident.status === "scheduled" ? (
+            <Calendar size={14} />
+          ) : (
+            config.icon
+          )}
         </div>
 
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Platform + product */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              marginBottom: 3,
+            }}
+          >
             <span
               style={{
-                fontSize: 10,
+                fontSize: 15,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
@@ -123,8 +135,16 @@ export function IncidentCard({ incident, index = 0 }: Props) {
             </span>
             {incident.product && (
               <>
-                <span style={{ color: "var(--text-muted)", fontSize: 10 }}>›</span>
-                <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 500 }}>
+                <span style={{ color: "var(--text-muted)", fontSize: 10 }}>
+                  ›
+                </span>
+                <span
+                  style={{
+                    fontSize: 15,
+                    color: "var(--text-muted)",
+                    fontWeight: 500,
+                  }}
+                >
                   {incident.product}
                 </span>
               </>
@@ -134,7 +154,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
           {/* Title */}
           <div
             style={{
-              fontSize: 12,
+              fontSize: 15,
               fontWeight: 600,
               color: "var(--text-primary)",
               lineHeight: 1.3,
@@ -157,7 +177,9 @@ export function IncidentCard({ incident, index = 0 }: Props) {
               flexWrap: "wrap",
             }}
           >
-            <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{timeAgo}</span>
+            <span style={{ fontSize: 15, color: "var(--text-muted)" }}>
+              {timeAgo}
+            </span>
             <span
               style={{
                 display: "inline-flex",
@@ -165,7 +187,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                 gap: 3,
                 padding: "1px 7px",
                 borderRadius: 999,
-                fontSize: 10,
+                fontSize: 15,
                 fontWeight: 600,
                 color: statusInfo.color,
                 background: `${statusInfo.color}15`,
@@ -179,7 +201,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                 display: "inline-flex",
                 padding: "1px 7px",
                 borderRadius: 999,
-                fontSize: 10,
+                fontSize: 15,
                 fontWeight: 600,
                 color: config.color,
                 background: config.bg,
@@ -192,7 +214,15 @@ export function IncidentCard({ incident, index = 0 }: Props) {
         </div>
 
         {/* Expand + link */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+            flexShrink: 0,
+          }}
+        >
           <span style={{ color: "var(--text-muted)" }}>
             {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </span>
@@ -223,7 +253,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
           {incident.description && (
             <p
               style={{
-                fontSize: 12,
+                fontSize: 15,
                 color: "var(--text-secondary)",
                 lineHeight: 1.5,
                 margin: 0,
@@ -241,7 +271,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
                   style={{
                     padding: "2px 7px",
                     borderRadius: 4,
-                    fontSize: 10,
+                    fontSize: 15,
                     background: "var(--bg-glass)",
                     border: "1px solid var(--border-subtle)",
                     color: "var(--text-secondary)",
