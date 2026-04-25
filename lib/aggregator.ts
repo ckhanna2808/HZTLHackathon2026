@@ -44,10 +44,10 @@ export async function buildSnapshot(): Promise<LiveWatchSnapshotEnriched> {
     platforms[p.platform] = p;
   }
 
-  // ALL non-resolved Sitecore publications — for DISPLAY only
+  // ALL non-resolved Sitecore publications - for DISPLAY only
   const activePubs = sitecorePublications.filter((p) => p.status !== "resolved");
 
-  // P1/P2 only — used for description text, NOT for status/health
+  // P1/P2 only - used for description text, NOT for status/health
   const impactingPubs = activePubs.filter(
     (p) => p.impact === "critical" || p.impact === "major"
   );
@@ -74,7 +74,7 @@ export async function buildSnapshot(): Promise<LiveWatchSnapshotEnriched> {
           ? `${impactingPubs.length} component(s) impacted · ${activePubs.length} total events`
           : "Partial service degradation detected",
     updatedAt: now,
-    activeIncidents: activePubs,          // full list for display — does NOT affect status
+    activeIncidents: activePubs,          // full list for display - does NOT affect status
     components: sitecoreAvailability.components.map((c, idx) => ({
       id: `sitecore-comp-${idx}`,
       name: c.name,

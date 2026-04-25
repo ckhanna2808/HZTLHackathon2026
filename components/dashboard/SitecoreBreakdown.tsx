@@ -471,7 +471,7 @@ export function SitecoreBreakdown({ products }: Props) {
   const allOperational = entries.every((p) => p.status === "operational");
   const degradedCount = entries.filter((p) => p.status !== "operational").length;
 
-  // Collect all active incidents — this is what the user was asking about
+  // Collect all active incidents - this is what the user was asking about
   const activeIncidents = entries
     .flatMap((p) => (p.incident ? [p.incident] : []))
     .filter((inc, idx, arr) => arr.findIndex((x) => x.id === inc.id) === idx) // deduplicate
@@ -641,7 +641,7 @@ export function SitecoreBreakdown({ products }: Props) {
                     {history.length === 0 ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--status-green)", fontSize: 12 }}>
                         <CheckCircle size={13} />
-                        No incidents recorded — 100% uptime
+                        No incidents recorded - 100% uptime
                       </div>
                     ) : (
                       <>

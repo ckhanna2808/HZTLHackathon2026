@@ -3,12 +3,12 @@
 /* ─── Google Fonts ─────────────────────────────────────────────────────────── */
 /* Loaded via <head> in layout.tsx */
 
-/* ─── Design Tokens — Dark (default) ───────────────────────────────────────── */
+/* ─── Design Tokens - Dark (default) ───────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Backgrounds — warmer, less pitch-black */
+  /* Backgrounds - warmer, less pitch-black */
   --bg-base: #13151c;
   --bg-primary: #181b24;
   --bg-secondary: #1e2130;
@@ -18,7 +18,7 @@
   --bg-glass: rgba(255, 255, 255, 0.05);
   --bg-glass-border: rgba(255, 255, 255, 0.09);
 
-  /* Brand — softer, friendlier blue palette */
+  /* Brand - softer, friendlier blue palette */
   --accent-primary: #5b8af0;
   --accent-primary-dim: rgba(91, 138, 240, 0.14);
   --accent-primary-glow: rgba(91, 138, 240, 0.35);
@@ -26,7 +26,7 @@
   --accent-secondary-dim: rgba(56, 189, 248, 0.14);
   --accent-violet: #a78bfa;
 
-  /* Status Colors — accessible, not too saturated */
+  /* Status Colors - accessible, not too saturated */
   --status-green: #34d399;
   --status-green-dim: rgba(52, 211, 153, 0.12);
   --status-green-glow: rgba(52, 211, 153, 0.3);
@@ -42,7 +42,7 @@
   --status-gray: #94a3b8;
   --status-gray-dim: rgba(148, 163, 184, 0.12);
 
-  /* Text — warm whites, comfortable contrast */
+  /* Text - warm whites, comfortable contrast */
   --text-primary: #edf0f7;
   --text-secondary: #a0aec0;
   --text-tertiary: #6b7a99;
@@ -65,13 +65,21 @@
   --header-bg: rgba(24, 27, 36, 0.92);
   --sidebar-bg: #181b24;
   --page-bg: #13151c;
+
+  /* Platform brand colours (dark mode) */
+  --platform-vercel: #ffffff;
+  --platform-netlify: #00c7b7;
+  --platform-github: #e8eaed;
+  --platform-cloudflare: #f6821f;
+  --platform-npm: #cb3837;
+  --platform-sitecore: #eb1f1f;
 }
 
-/* ─── Design Tokens — Light ─────────────────────────────────────────────────── */
+/* ─── Design Tokens - Light ─────────────────────────────────────────────────── */
 [data-theme="light"] {
   color-scheme: light;
 
-  /* Backgrounds — warm whites, not cold gray */
+  /* Backgrounds - warm whites, not cold gray */
   --bg-base: #f5f6fa;
   --bg-primary: #ffffff;
   --bg-secondary: #f0f2f8;
@@ -128,6 +136,14 @@
   --header-bg: rgba(255, 255, 255, 0.9);
   --sidebar-bg: #ffffff;
   --page-bg: #f5f6fa;
+
+  /* Platform brand colours (light mode) */
+  --platform-vercel: #000000;       /* Vercel's own brand on light bg */
+  --platform-netlify: #007a72;      /* darkened teal for contrast */
+  --platform-github: #24292f;       /* GitHub's official dark colour */
+  --platform-cloudflare: #b45309;   /* amber-700, WCAG AA on white */
+  --platform-npm: #b91c1c;          /* red-700 */
+  --platform-sitecore: #b91c1c;     /* red-700 */
 }
 
 /* ─── Shared Tokens ─────────────────────────────────────────────────────────── */
@@ -191,7 +207,7 @@ body {
   background-clip: text;
 }
 
-/* Light mode hero gradient — navy to brand blue */
+/* Light mode hero gradient - navy to brand blue */
 [data-theme="light"] .text-gradient-hero {
   background: linear-gradient(135deg, #1a202c 0%, var(--accent-primary) 60%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;

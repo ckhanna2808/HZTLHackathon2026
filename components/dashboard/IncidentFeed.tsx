@@ -41,7 +41,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           flexWrap: "wrap",
         }}
       >
-        <Bell size={14} color="var(--accent-blue)" />
+        <Bell size={14} color="var(--accent-primary)" />
         <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
           Incident Feed
         </span>
@@ -86,9 +86,9 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
                 gap: 4,
                 padding: "3px 9px",
                 borderRadius: 6,
-                border: `1px solid ${sortOrder === opt ? "var(--accent-blue)" : "var(--border-subtle)"}`,
-                background: sortOrder === opt ? "rgba(59,130,246,0.13)" : "transparent",
-                color: sortOrder === opt ? "var(--accent-blue)" : "var(--text-muted)",
+                border: `1px solid ${sortOrder === opt ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                background: sortOrder === opt ? "var(--accent-primary-dim)" : "transparent",
+                color: sortOrder === opt ? "var(--accent-primary)" : "var(--text-muted)",
                 fontSize: 10,
                 fontWeight: 600,
                 cursor: "pointer",

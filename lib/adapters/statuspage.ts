@@ -123,7 +123,7 @@ export async function fetchStatuspagePlatform(
   const now = new Date().toISOString();
 
   try {
-    // ── Primary: summary.json — platform status + currently active incidents ──
+    // ── Primary: summary.json - platform status + currently active incidents ──
     const res = await fetch(`${baseUrl}/summary.json`, {
       next: { revalidate: 55 },
       headers: { Accept: "application/json" },
@@ -134,7 +134,7 @@ export async function fetchStatuspagePlatform(
 
     const data: StatuspageResponse = await res.json();
 
-    // ── Secondary: incidents.json — full history including resolved ────────────
+    // ── Secondary: incidents.json - full history including resolved ────────────
     // This gives us resolved incidents from the past ~25 entries so the
     // per-platform incident feed shows recent history, not just active ones.
     let allRawIncidents: StatuspageIncident[] = [...data.incidents];
@@ -153,7 +153,7 @@ export async function fetchStatuspagePlatform(
         allRawIncidents = [...data.incidents, ...resolvedOnly];
       }
     } catch {
-      // History fetch is best-effort — don't fail the whole platform fetch
+      // History fetch is best-effort - don't fail the whole platform fetch
       console.warn(`[statuspage] Could not fetch incident history for ${platformId}`);
     }
 
@@ -167,7 +167,7 @@ export async function fetchStatuspagePlatform(
         group: c.group_id ?? undefined,
       }));
 
-    // Map ALL incidents (active + resolved) — resolved ones get status:"resolved"
+    // Map ALL incidents (active + resolved) - resolved ones get status:"resolved"
     const activeIncidents: LiveWatchIncident[] = allRawIncidents.map(
       (inc: StatuspageIncident) => ({
         id: `${platformId}-${inc.id}`,
@@ -200,7 +200,7 @@ export async function fetchStatuspagePlatform(
       indicator: data.status.indicator,
       description: data.status.description,
       updatedAt: data.page.updated_at,
-      activeIncidents,   // includes resolved — filtered per-view in page.tsx
+      activeIncidents,   // includes resolved - filtered per-view in page.tsx
       components,
       healthPercent: calcHealthPercent(data.status.indicator, data.incidents),
       lastChecked: now,

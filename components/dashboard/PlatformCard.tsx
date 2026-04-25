@@ -25,14 +25,12 @@ const PLATFORM_ICONS: Record<string, React.ReactNode> = {
   sitecore: <Layers size={20} />,
 };
 
-const PLATFORM_COLORS: Record<string, string> = {
-  vercel: "#fff",
-  netlify: "#00c7b7",
-  github: "#e8eaed",
-  cloudflare: "#f6821f",
-  npm: "#cb3837",
-  sitecore: "#eb1f1f",
-};
+/** Returns the CSS variable for a platform's brand colour, e.g. "var(--platform-vercel)".
+ *  The actual colour values switch automatically with [data-theme] in globals.css.
+ */
+function platformColorVar(platform: string): string {
+  return `var(--platform-${platform}, var(--text-secondary))`;
+}
 
 const STATUS_CARD_CLASS: Record<SystemStatus, string> = {
   operational: "card-operational",
@@ -66,14 +64,14 @@ interface Props {
 export function PlatformCard({ platform, animationDelay = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const icon = PLATFORM_ICONS[platform.platform];
-  const color = PLATFORM_COLORS[platform.platform] ?? "#fff";
+  const colorVar = platformColorVar(platform.platform);
   const statusColor = STATUS_COLOR[platform.status] ?? STATUS_COLOR.unknown;
   const cardClass = STATUS_CARD_CLASS[platform.status] ?? "";
   const hasIncidents = platform.activeIncidents.length > 0;
 
   const lastUpdated = platform.updatedAt
     ? formatDistanceToNow(new Date(platform.updatedAt), { addSuffix: true })
-    : "—";
+    : "-";
 
   return (
     <div
@@ -95,13 +93,14 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
             width: 44,
             height: 44,
             borderRadius: 10,
-            background: `${color}14`,
-            border: `1px solid ${color}28`,
+            background: `color-mix(in srgb, ${colorVar} 9%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${colorVar} 18%, transparent)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color,
+            color: colorVar,
             flexShrink: 0,
+            transition: "background 220ms ease, border-color 220ms ease, color 220ms ease",
           }}
         >
           {icon}
@@ -166,7 +165,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
       >
         <StatCell
           label="Components"
-          value={platform.components.length || "—"}
+          value={platform.components.length || "-"}
         />
         <StatCell
           label="Incidents"
@@ -221,7 +220,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           >
             Components
           </div>
-          {/* Scrollable — shows ALL components, non-operational sorted first */}
+          {/* Scrollable - shows ALL components, non-operational sorted first */}
           <div
             style={{
               maxHeight: 220,
