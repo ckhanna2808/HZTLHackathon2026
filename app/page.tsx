@@ -23,6 +23,50 @@ async function fetcher(url: string): Promise<LiveWatchSnapshot> {
 
 export default function DashboardPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
+  const [triggerStatus, setTriggerStatus] = useState<{ id: string | null; msg: string; type: "info" | "success" | "error" }>({ id: null, msg: "", type: "info" });
+  const [isTriggering, setIsTriggering] = useState<string | null>(null);
+
+  const handleTrigger = async (type: "digest" | "recovery" | "urgent") => {
+    setIsTriggering(type);
+    setTriggerStatus({ id: type, msg: `Triggering ${type}...`, type: "info" });
+
+    const secret = process.env.NEXT_PUBLIC_CRON_SECRET;
+    
+    // In production, the secret is mandatory for these routes.
+    // In local dev, we check it for safety but the API might allow bypass.
+    if (!secret && process.env.NODE_ENV === "production") {
+      setTriggerStatus({ id: type, msg: "Error: Missing NEXT_PUBLIC_CRON_SECRET", type: "error" });
+      setIsTriggering(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/cron/incident-${type}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${secret || ""}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setTriggerStatus({
+          id: type,
+          msg: `Success! ${data.eventsAnalysed || data.recoveredCount || 0} events processed.`,
+          type: "success"
+        });
+      } else {
+        throw new Error(data.message || "Failed to trigger");
+      }
+    } catch (err) {
+      setTriggerStatus({ id: type, msg: `Error: ${err instanceof Error ? err.message : "Unknown"}`, type: "error" });
+    } finally {
+      setIsTriggering(null);
+      // Clear status after 5 seconds
+      setTimeout(() => setTriggerStatus({ id: null, msg: "", type: "info" }), 5000);
+    }
+  };
 
   const {
     data: snapshot,
@@ -243,11 +287,80 @@ export default function DashboardPage() {
             </div>
 
             {/* Right column — Incident Feed */}
-            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column" }}>
+            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
               <IncidentFeed
                 incidents={filteredIncidents}
                 isLoading={isLoading && !snapshot}
               />
+
+              {/* ─── Manual Notification Controls ────────────────────────── */}
+              <div className="glass-card" style={{ padding: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                  <div style={{ padding: 8, background: "rgba(99, 102, 241, 0.1)", borderRadius: 8 }}>
+                    <span style={{ fontSize: 18 }}>📢</span>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: 14, fontWeight: 800, margin: 0, color: "var(--text-primary)" }}>Incident Awareness</h3>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0 }}>Manual Slack Triggers</p>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <button
+                    onClick={() => handleTrigger("urgent")}
+                    disabled={!!isTriggering}
+                    className="trigger-btn"
+                    style={{
+                      background: "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
+                      color: "white",
+                    }}
+                  >
+                    {isTriggering === "urgent" ? "Scanning..." : "🚨 Run Urgent Alert"}
+                  </button>
+
+                  <button
+                    onClick={() => handleTrigger("recovery")}
+                    disabled={!!isTriggering}
+                    className="trigger-btn"
+                    style={{
+                      background: "var(--status-green-dim)",
+                      color: "var(--status-green)",
+                      border: "1px solid rgba(16,185,129,0.2)",
+                    }}
+                  >
+                    {isTriggering === "recovery" ? "Scanning..." : "✅ Run Recovery Scan"}
+                  </button>
+
+                  <button
+                    onClick={() => handleTrigger("digest")}
+                    disabled={!!isTriggering}
+                    className="trigger-btn"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      color: "var(--text-primary)",
+                      border: "1px solid var(--border-subtle)",
+                    }}
+                  >
+                    {isTriggering === "digest" ? "Sending..." : "📅 Run Daily Digest"}
+                  </button>
+
+                  {triggerStatus.id && (
+                    <div style={{
+                      marginTop: 8,
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textAlign: "center",
+                      background: triggerStatus.type === "success" ? "var(--status-green-dim)" : triggerStatus.type === "error" ? "var(--status-red-dim)" : "rgba(255,255,255,0.05)",
+                      color: triggerStatus.type === "success" ? "var(--status-green)" : triggerStatus.type === "error" ? "var(--status-red)" : "var(--text-muted)",
+                      border: `1px solid ${triggerStatus.type === "success" ? "rgba(16,185,129,0.2)" : triggerStatus.type === "error" ? "rgba(239,68,68,0.2)" : "var(--border-subtle)"}`,
+                    }}>
+                      {triggerStatus.msg}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </main>

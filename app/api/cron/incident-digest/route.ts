@@ -354,18 +354,25 @@ export async function GET(request: NextRequest) {
       return true;
     });
 
-    // ── 4. Filter: last-24h window + ALL scheduled maintenances (no time gate) ─
-    // • Scheduled maintenances → always included (upcoming = advance warning)
-    // • Active incidents       → always included regardless of when they started
+    // ─── 48-Hour Proximity Filter for Scheduled Maintenance ──────────────────
+    // We only show maintenance starting in the next 48 hours to avoid noise.
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1_000;
+    const proximityCutoff = Date.now() + TWENTY_FOUR_HOURS_MS;
+
+    // ── 4. Filter: last-24h window + imminent scheduled maintenances ──────────
+    // • Scheduled maintenances → included if starting within 48h
+    // • Active incidents       → always included
     // • Resolved incidents     → included if they started within the 24h window
     const relevant = deduped.filter((inc) => {
-      if (inc.status === "scheduled") return true;   // always notify maintenance
+      if (inc.status === "scheduled") {
+        return new Date(inc.startedAt).getTime() <= proximityCutoff;
+      }
       if (inc.status !== "resolved") return true;    // active incidents always in
       return isWithin24Hours(inc.startedAt);         // resolved: 24h window
     });
 
     console.log(
-      `[incident-digest] ${relevant.length} relevant events after 24h filter ` +
+      `[incident-digest] ${relevant.length} relevant events after filtering ` +
       `(active: ${relevant.filter(i => i.status !== "scheduled" && i.status !== "resolved").length}, ` +
       `scheduled: ${relevant.filter(i => i.status === "scheduled").length}, ` +
       `resolved: ${relevant.filter(i => i.status === "resolved").length})`
@@ -408,7 +415,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       polledAt: runAt,
-      window: "48h",
+      window: "24h",
       eventsAnalysed: relevant.length,
       activeIncidents: relevant.filter(
         (i) => i.status !== "scheduled" && i.status !== "resolved"

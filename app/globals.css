@@ -176,6 +176,38 @@ body {
 /* ─── Typography ────────────────────────────────────────────────────────────── */
 .font-mono { font-family: "JetBrains Mono", "Fira Code", monospace; }
 
+/* ─── Buttons ───────────────────────────────────────────────────────────────── */
+.trigger-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.01em;
+}
+
+.trigger-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.trigger-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.trigger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
 .text-gradient {
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;

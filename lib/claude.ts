@@ -103,12 +103,12 @@ export async function analyzeIncidentsWithClaude(
     schema: responseSchema,
     data: {
       window: "last_24h_utc",
-      incidents,
+      incidents: incidents.slice(0, Number(process.env.CLAUDE_MAX_INCIDENTS || 2)),
       operational: operationalPlatforms,
     },
   });
 
-  return callClaude(userMessage, 8192);
+  return callClaude(userMessage, Number(process.env.ANTHROPIC_API_MAX_TOKENS || 8192));
 }
 
 // ─── Internal fetch helper ────────────────────────────────────────────────────
