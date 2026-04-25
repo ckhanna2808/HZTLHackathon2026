@@ -84,7 +84,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
       color:
         secondsToNextPoll !== null && secondsToNextPoll <= 10
           ? "var(--status-yellow)"   // turns yellow in last 10s
-          : "var(--accent-cyan)",
+          : "var(--accent-secondary)",
     },
   ];
 

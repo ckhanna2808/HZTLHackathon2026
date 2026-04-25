@@ -65,6 +65,14 @@
   --header-bg: rgba(24, 27, 36, 0.92);
   --sidebar-bg: #181b24;
   --page-bg: #13151c;
+
+  /* Platform brand colours (dark mode) */
+  --platform-vercel: #ffffff;
+  --platform-netlify: #00c7b7;
+  --platform-github: #e8eaed;
+  --platform-cloudflare: #f6821f;
+  --platform-npm: #cb3837;
+  --platform-sitecore: #eb1f1f;
 }
 
 /* ─── Design Tokens — Light ─────────────────────────────────────────────────── */
@@ -128,6 +136,14 @@
   --header-bg: rgba(255, 255, 255, 0.9);
   --sidebar-bg: #ffffff;
   --page-bg: #f5f6fa;
+
+  /* Platform brand colours (light mode) */
+  --platform-vercel: #000000;       /* Vercel's own brand on light bg */
+  --platform-netlify: #007a72;      /* darkened teal for contrast */
+  --platform-github: #24292f;       /* GitHub's official dark colour */
+  --platform-cloudflare: #b45309;   /* amber-700, WCAG AA on white */
+  --platform-npm: #b91c1c;          /* red-700 */
+  --platform-sitecore: #b91c1c;     /* red-700 */
 }
 
 /* ─── Shared Tokens ─────────────────────────────────────────────────────────── */

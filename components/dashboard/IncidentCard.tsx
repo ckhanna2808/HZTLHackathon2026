@@ -59,20 +59,18 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   operational: { label: "Operational", color: "var(--status-green)" },
 };
 
-const PLATFORM_COLORS: Record<string, string> = {
-  vercel: "#fff",
-  netlify: "#00c7b7",
-  github: "#e8eaed",
-  cloudflare: "#f6821f",
-  npm: "#cb3837",
-  sitecore: "#eb1f1f",
-};
+/** Returns the CSS variable for a platform's brand colour.
+ *  Values are defined per-theme in globals.css — no JS theme check needed.
+ */
+function platformColorVar(source: string): string {
+  return `var(--platform-${source}, var(--text-secondary))`;
+}
 
 export function IncidentCard({ incident, index = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const config = IMPACT_CONFIG[incident.impact] ?? IMPACT_CONFIG.none;
   const statusInfo = STATUS_LABELS[incident.status] ?? STATUS_LABELS.investigating;
-  const platformColor = PLATFORM_COLORS[incident.source] ?? "var(--text-secondary)";
+  const platformColor = platformColorVar(incident.source);
   const isResolved = incident.status === "resolved";
 
   const timeAgo = incident.startedAt
