@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Activity, Bell, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Activity, Bell, RefreshCw, Wifi, WifiOff, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/components/layout/ThemeProvider";
 
 interface HeaderProps {
   activeIncidentCount: number;
@@ -19,6 +20,7 @@ export function Header({
   const [now, setNow] = useState(new Date());
   const [online, setOnline] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -58,24 +60,25 @@ export function Header({
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%)",
+            width: 34,
+            height: 34,
+            borderRadius: 9,
+            background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             boxShadow: "var(--shadow-glow-blue)",
+            flexShrink: 0,
           }}
         >
           <Activity size={16} color="#fff" />
         </div>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.02em" }}>
             <span className="text-gradient-hero">HZTL LiveWatch</span>
           </div>
           <div
-            style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", fontWeight: 500 }}
+            style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", fontWeight: 500 }}
           >
             ALWAYS WATCHING
           </div>
@@ -86,7 +89,7 @@ export function Header({
       <div style={{ flex: 1 }} />
 
       {/* Status indicators */}
-      <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         {/* Network status */}
         <div
           style={{
@@ -94,11 +97,12 @@ export function Header({
             alignItems: "center",
             gap: 5,
             fontSize: 12,
+            fontWeight: 500,
             color: online ? "var(--status-green)" : "var(--status-red)",
           }}
         >
           {online ? <Wifi size={13} /> : <WifiOff size={13} />}
-          <span style={{ fontWeight: 500 }}>{online ? "Live" : "Offline"}</span>
+          <span>{online ? "Live" : "Offline"}</span>
         </div>
 
         {/* Last polled */}
@@ -113,12 +117,12 @@ export function Header({
         <div
           className="font-mono"
           style={{
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: 12,
+            fontWeight: 500,
             color: "var(--text-primary)",
             background: "var(--bg-glass)",
             border: "1px solid var(--border-subtle)",
-            borderRadius: 6,
+            borderRadius: 7,
             padding: "4px 10px",
           }}
         >
@@ -136,7 +140,7 @@ export function Header({
               padding: "5px 12px",
               borderRadius: 999,
               background: "var(--status-red-dim)",
-              border: "1px solid rgba(239,68,68,0.35)",
+              border: "1px solid color-mix(in srgb, var(--status-red) 35%, transparent)",
               fontSize: 12,
               fontWeight: 600,
               color: "var(--status-red)",
@@ -146,8 +150,8 @@ export function Header({
             <span>{activeIncidentCount} Active</span>
             <span
               style={{
-                width: 7,
-                height: 7,
+                width: 6,
+                height: 6,
                 borderRadius: "50%",
                 background: "var(--status-red)",
                 animation: "pulse-dot 1.4s ease-in-out infinite",
@@ -158,27 +162,28 @@ export function Header({
 
         {/* Refresh button */}
         <button
+          id="refresh-btn"
           onClick={onRefresh}
           disabled={isLoading}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: "var(--bg-glass)",
-            border: "1px solid var(--border-subtle)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            color: "var(--text-secondary)",
-            transition: "all 0.15s ease",
-          }}
-          title="Refresh now"
+          className="theme-toggle"
+          title="Refresh data"
+          aria-label="Refresh data"
         >
           <RefreshCw
-            size={13}
+            size={14}
             style={{ animation: isLoading ? "spin-slow 1s linear infinite" : "none" }}
           />
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          id="theme-toggle-btn"
+          onClick={toggleTheme}
+          className="theme-toggle"
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {mounted && theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
         </button>
       </div>
     </header>

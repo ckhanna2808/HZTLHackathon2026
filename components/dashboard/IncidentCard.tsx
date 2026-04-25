@@ -55,7 +55,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   identified: { label: "Identified", color: "var(--status-orange)" },
   monitoring: { label: "Monitoring", color: "var(--status-yellow)" },
   resolved: { label: "Resolved", color: "var(--status-green)" },
-  scheduled: { label: "Scheduled", color: "var(--accent-blue)" },
+  scheduled: { label: "Scheduled", color: "var(--accent-primary)" },
   operational: { label: "Operational", color: "var(--status-green)" },
 };
 

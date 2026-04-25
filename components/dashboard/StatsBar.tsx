@@ -45,7 +45,7 @@ export function StatsBar({ stats }: Props) {
           ? `${stats.avgResolutionMinutes}m`
           : "—",
       sub: "MTTR",
-      color: "var(--accent-blue)",
+      color: "var(--accent-primary)",
     },
     {
       icon: <Layers size={15} />,
@@ -72,7 +72,7 @@ export function StatsBar({ stats }: Props) {
           })()
         : "—",
       sub: "Cron interval",
-      color: "var(--accent-cyan)",
+      color: "var(--accent-secondary)",
     },
   ];
 
