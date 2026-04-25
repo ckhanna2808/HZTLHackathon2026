@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
     const allMaintenances = fetchBatches.slice(platformCount).flat();
 
     // Sitecore incidents come from the snapshot (RSS-based)
-    const sitecoreIncidents: LiveWatchIncident[] = snapshot.incidentHistory.filter(
+    const sitecoreIncidents: LiveWatchIncident[] = snapshot.activeIncidents.filter(
       (i) => i.source === "sitecore"
     );
 
