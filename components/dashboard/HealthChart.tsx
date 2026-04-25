@@ -43,7 +43,7 @@ export function HealthChart({ platforms }: Props) {
           marginBottom: 20,
         }}
       >
-        <TrendingUp size={15} color="var(--accent-blue)" />
+        <TrendingUp size={15} color="var(--accent-primary)" />
         <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
           Platform Health Overview
         </span>

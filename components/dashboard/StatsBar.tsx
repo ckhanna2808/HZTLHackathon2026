@@ -61,7 +61,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
           ? `${stats.avgResolutionMinutes}m`
           : "—",
       sub: "MTTR",
-      color: "var(--accent-blue)",
+      color: "var(--accent-primary)",
     },
     {
       icon: <Layers size={15} />,

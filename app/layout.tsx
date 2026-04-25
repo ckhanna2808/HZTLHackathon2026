@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "HZTL LiveWatch — Always Watching. Always Alert.",
@@ -20,21 +21,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
+        {/* Inline script to apply theme before first paint — prevents flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var stored = localStorage.getItem('hz-livewatch-theme');
+                if (stored === 'light' || stored === 'dark') {
+                  document.documentElement.setAttribute('data-theme', stored);
+                } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
+              } catch(e) {}
+            `,
+          }}
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
-        <div className="hero-glow" />
-        <div className="bg-grid" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {children}
-        </div>
+        <ThemeProvider>
+          <div className="hero-glow" />
+          <div className="bg-grid" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
