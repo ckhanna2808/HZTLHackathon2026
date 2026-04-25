@@ -262,15 +262,16 @@ body {
 
 /* ─── Live header Activity icon ─────────────────────────────────────────────── */
 .activity-live {
-  color: #fff;
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.25));
+  /* Uses currentColor inside the SVG; this adapts to theme tokens */
+  color: var(--text-primary);
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.22));
 }
 
 .activity-live path,
 .activity-live polyline,
 .activity-live line,
 .activity-live circle {
-  stroke: #fff;
+  stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -278,6 +279,10 @@ body {
   stroke-dasharray: 220;
   stroke-dashoffset: 220;
   animation: activity-draw 1.9s linear infinite;
+}
+
+[data-theme="light"] .activity-live {
+  filter: drop-shadow(0 0 10px rgba(59, 108, 212, 0.18));
 }
 
 @keyframes activity-draw {
@@ -953,33 +958,6 @@ a:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-/* ─── Scroll reveal (lazy-feel) ─────────────────────────────────────────────── */
-.reveal {
-  opacity: 0;
-  transform: translateY(16px);
-  filter: blur(0.5px);
-  transition:
-    opacity 1700ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 1700ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1700ms cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
-    transition: none !important;
   }
 }
 

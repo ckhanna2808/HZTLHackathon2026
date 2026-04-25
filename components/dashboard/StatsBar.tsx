@@ -132,11 +132,10 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
             {item.icon}
             <span
               style={{
-                fontSize: 15,
+                fontSize: 12,
                 fontWeight: 700,
-                textTransform: "uppercase",
                 letterSpacing: "0.07em",
-                color: "var(--text-primary)",
+                color: "var(--text-muted)",
               }}
             >
               {item.label}
@@ -157,7 +156,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
           </div>
           <div
             style={{
-              fontSize: 15,
+              fontSize: 12,
               color: "var(--text-muted)",
               fontWeight: 500,
             }}

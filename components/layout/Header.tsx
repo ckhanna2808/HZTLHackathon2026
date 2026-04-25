@@ -331,10 +331,10 @@ export function Header({
         <div className="flex items-center">
           <div>
             <Image
-              src="/img/headerlogo.png"
+              src="/img/hztl-livewatch-icon.svg"
               alt="HZTL LiveWatch logo"
-              width={80}
-              height={60}
+              width={40}
+              height={40}
               priority
             />
           </div>

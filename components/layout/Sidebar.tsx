@@ -222,7 +222,7 @@ export function Sidebar({
             </span>
             <span
               style={{
-                fontSize: 15,
+                fontSize: 12,
                 fontWeight: 800,
                 color:
                   globalHealth >= 90

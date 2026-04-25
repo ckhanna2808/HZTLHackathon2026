@@ -10,7 +10,6 @@ import { PlatformCard } from "@/components/dashboard/PlatformCard";
 import { IncidentFeed } from "@/components/dashboard/IncidentFeed";
 import { SitecoreBreakdown } from "@/components/dashboard/SitecoreBreakdown";
 import { HealthChart } from "@/components/dashboard/HealthChart";
-import { Reveal } from "@/components/ui/Reveal";
 
 // ─── Data Fetcher ─────────────────────────────────────────────────────────────
 
@@ -115,12 +114,7 @@ export default function DashboardPage() {
         <main className="page-content">
           {/* Stats bar */}
           {snapshot && (
-            <Reveal>
-              <StatsBar
-                stats={snapshot.stats}
-                activeIncidentCount={activeCount}
-              />
-            </Reveal>
+            <StatsBar stats={snapshot.stats} activeIncidentCount={activeCount} />
           )}
           {isLoading && !snapshot && <StatsBarSkeleton />}
 
@@ -152,7 +146,7 @@ export default function DashboardPage() {
                   </h1>
                   <p
                     style={{
-                      fontSize: 15,
+                      fontSize: 12,
                       color: "var(--text-muted)",
                       margin: "2px 0 0",
                     }}
@@ -169,7 +163,7 @@ export default function DashboardPage() {
                     style={{
                       padding: "5px 14px",
                       borderRadius: 999,
-                      fontSize: 15,
+                      fontSize: 12,
                       fontWeight: 600,
                       ...(activeCount === 0
                         ? {
@@ -198,9 +192,11 @@ export default function DashboardPage() {
                       <PlatformCardSkeleton key={i} />
                     ))
                   : filteredPlatforms.map((p, i) => (
-                      <Reveal key={p.platform} delayMs={i * 70}>
-                        <PlatformCard platform={p} animationDelay={0} />
-                      </Reveal>
+                      <PlatformCard
+                        key={p.platform}
+                        platform={p}
+                        animationDelay={i * 80}
+                      />
                     ))}
               </div>
 
@@ -208,29 +204,23 @@ export default function DashboardPage() {
               {snapshot &&
                 (selectedPlatform === "all" ||
                   selectedPlatform === "sitecore") && (
-                  <Reveal>
-                    <SitecoreBreakdown products={snapshot.sitecoreProducts} />
-                  </Reveal>
+                  <SitecoreBreakdown products={snapshot.sitecoreProducts} />
                 )}
 
               {/* Health chart */}
               {snapshot && platforms.length > 0 && (
-                <Reveal>
-                  <HealthChart platforms={platforms} />
-                </Reveal>
+                <HealthChart platforms={platforms} />
               )}
 
               {/* Embeddable Status Badges - code snippets only, no rendered images */}
               {snapshot && (
-                <Reveal>
-                  <div className="glass-card" style={{ padding: "18px 20px" }}>
+                <div className="glass-card" style={{ padding: "18px 20px" }}>
                     <div
                       style={{
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: 700,
                         color: "var(--text-primary)",
                         marginBottom: 12,
-                        textTransform: "uppercase",
                       }}
                     >
                       📌 Embeddable Status Badges
@@ -280,8 +270,7 @@ export default function DashboardPage() {
                         ),
                       )}
                     </div>
-                  </div>
-                </Reveal>
+                </div>
               )}
             </div>
 
@@ -296,12 +285,10 @@ export default function DashboardPage() {
                 flexDirection: "column",
               }}
             >
-              <Reveal>
-                <IncidentFeed
-                  incidents={filteredIncidents}
-                  isLoading={isLoading && !snapshot}
-                />
-              </Reveal>
+              <IncidentFeed
+                incidents={filteredIncidents}
+                isLoading={isLoading && !snapshot}
+              />
             </div>
           </div>
         </main>
