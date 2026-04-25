@@ -45,7 +45,9 @@ export function Header({
 
   const relativeLastPoll = lastPollAt
     ? (() => {
-        const diff = Math.floor((Date.now() - new Date(lastPollAt).getTime()) / 1000);
+        const diff = Math.floor(
+          (Date.now() - new Date(lastPollAt).getTime()) / 1000,
+        );
         if (diff < 5) return "just now";
         if (diff < 60) return `${diff}s ago`;
         return `${Math.floor(diff / 60)}m ago`;
@@ -55,27 +57,27 @@ export function Header({
   return (
     <header className="top-header">
       {/* Logo */}
+
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "var(--shadow-glow-blue)",
-          }}
-        >
-          <Activity size={16} color="#fff" />
-        </div>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em" }}>
-            <span className="text-gradient-hero">HZTL LiveWatch</span>
+        <div className="flex items-center">
+          <div className="">
+            <img src="/img/logo.png" alt="" className="w-20 h-15" />
           </div>
           <div
-            style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", fontWeight: 500 }}
+            style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-0.02em" }}
+          >
+            <span className="text-gradient-hero mx-2">HZTL LiveWatch</span>
+          </div>
+          <div className="mx-1">
+            <Activity size={16} color="#fff" />
+          </div>
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--text-muted)",
+              letterSpacing: "0.08em",
+              fontWeight: 500,
+            }}
           >
             ALWAYS WATCHING
           </div>
@@ -177,7 +179,9 @@ export function Header({
         >
           <RefreshCw
             size={13}
-            style={{ animation: isLoading ? "spin-slow 1s linear infinite" : "none" }}
+            style={{
+              animation: isLoading ? "spin-slow 1s linear infinite" : "none",
+            }}
           />
         </button>
       </div>
