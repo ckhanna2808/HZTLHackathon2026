@@ -1,5 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
+    {
+      "path": "/api/cron/incident-urgent",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/incident-recovery",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/incident-digest",
+      "schedule": "0 0 * * *"
+    }
   ]
 }

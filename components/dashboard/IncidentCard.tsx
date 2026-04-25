@@ -11,6 +11,8 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -68,6 +70,8 @@ function platformColorVar(source: string): string {
 
 export function IncidentCard({ incident, index = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [notifyStatus, setNotifyStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const config = IMPACT_CONFIG[incident.impact] ?? IMPACT_CONFIG.none;
   const statusInfo =
     STATUS_LABELS[incident.status] ?? STATUS_LABELS.investigating;
@@ -77,6 +81,56 @@ export function IncidentCard({ incident, index = 0 }: Props) {
   const timeAgo = incident.startedAt
     ? formatDistanceToNow(new Date(incident.startedAt), { addSuffix: true })
     : "Unknown";
+
+  const incidentPayload = {
+    p: incident.source,
+    t: incident.title,
+    s: incident.status,
+    i: incident.impact,
+    c: incident.affectedComponents || [],
+    b: incident.description || "",
+    at: incident.startedAt || new Date().toISOString(),
+    url: incident.url || "",
+    type: (incident.status === "scheduled" ? "maintenance" : "incident") as "maintenance" | "incident",
+  };
+
+  const handleGenerateSummary = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isSending) return;
+    setIsSending(true);
+    try {
+      const res = await fetch("/api/incident-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ incident: incidentPayload, notify: true }),
+      });
+      if (!res.ok) {
+        console.error("Failed to call incident summary API");
+      }
+    } catch (err) {
+      console.error("Error calling incident summary API:", err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleNotifySlack = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (notifyStatus === "sending") return;
+    setNotifyStatus("sending");
+    try {
+      const res = await fetch("/api/incident-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ incident: incidentPayload, notify: true }),
+      });
+      setNotifyStatus(res.ok ? "sent" : "error");
+      if (res.ok) setTimeout(() => setNotifyStatus("idle"), 3000);
+    } catch {
+      setNotifyStatus("error");
+      setTimeout(() => setNotifyStatus("idle"), 3000);
+    }
+  };
 
   return (
     <div
@@ -219,7 +273,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 4,
+            gap: 8,
             flexShrink: 0,
           }}
         >
@@ -231,7 +285,8 @@ export function IncidentCard({ incident, index = 0 }: Props) {
               href={incident.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--text-muted)", display: "flex" }}
+              title="View Incident"
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink size={11} />
@@ -264,7 +319,7 @@ export function IncidentCard({ incident, index = 0 }: Props) {
             </p>
           )}
           {incident.affectedComponents.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
               {incident.affectedComponents.map((c) => (
                 <span
                   key={c}
@@ -282,6 +337,64 @@ export function IncidentCard({ incident, index = 0 }: Props) {
               ))}
             </div>
           )}
+
+          {/* Notify Slack button */}
+          <button
+            onClick={handleNotifySlack}
+            disabled={notifyStatus === "sending"}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "5px 12px",
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: notifyStatus === "sending" ? "wait" : "pointer",
+              border: `1px solid ${notifyStatus === "sent"
+                  ? "rgba(16,185,129,0.5)"
+                  : notifyStatus === "error"
+                    ? "rgba(239,68,68,0.5)"
+                    : "var(--accent-primary)"
+                }`,
+              background:
+                notifyStatus === "sent"
+                  ? "var(--status-green-dim)"
+                  : notifyStatus === "error"
+                    ? "var(--status-red-dim)"
+                    : "var(--accent-primary-dim)",
+              color:
+                notifyStatus === "sent"
+                  ? "var(--status-green)"
+                  : notifyStatus === "error"
+                    ? "var(--status-red)"
+                    : "var(--accent-primary)",
+              transition: "all 0.15s ease",
+              opacity: notifyStatus === "sending" ? 0.7 : 1,
+            }}
+          >
+            {notifyStatus === "sending" ? (
+              <>
+                <Loader2 size={11} style={{ animation: "spin 0.9s linear infinite" }} />
+                Sending...
+              </>
+            ) : notifyStatus === "sent" ? (
+              <>
+                <CheckCircle size={11} />
+                Sent to Slack!
+              </>
+            ) : notifyStatus === "error" ? (
+              <>
+                <AlertTriangle size={11} />
+                Failed — Retry
+              </>
+            ) : (
+              <>
+                <MessageSquare size={11} />
+                Notify Slack
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>

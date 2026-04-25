@@ -20,6 +20,7 @@ import {
   Sparkles,
   Loader2,
   ArrowDownNarrowWide,
+  MessageSquare,
 } from "lucide-react";
 
 interface SitecoreProductStatusEnriched {
@@ -166,6 +167,22 @@ interface SummaryState {
   error?: string;
 }
 
+type NotifyState = "idle" | "sending" | "sent" | "error";
+
+function buildIncidentPayload(incident: LiveWatchIncident) {
+  return {
+    p: incident.source ?? "sitecore",
+    t: incident.title,
+    s: incident.status,
+    i: incident.impact,
+    c: incident.affectedComponents ?? [],
+    b: incident.description ?? "",
+    at: incident.startedAt ?? new Date().toISOString(),
+    url: incident.url ?? "",
+    type: (incident.status === "scheduled" ? "maintenance" : "incident") as "maintenance" | "incident",
+  };
+}
+
 function ActiveIncidentBanner({
   incident,
   nowMs,
@@ -178,6 +195,7 @@ function ActiveIncidentBanner({
     incident.impact === "critical" || incident.impact === "major";
 
   const [summary, setSummary] = useState<SummaryState>({ status: "idle" });
+  const [notifyState, setNotifyState] = useState<NotifyState>("idle");
 
   async function generateSummary() {
     if (summary.status === "loading") return;
@@ -187,14 +205,7 @@ function ActiveIncidentBanner({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          incidentUrl: incident.url,
-          title: incident.title,
-          description: incident.description,
-          impact: incident.impact,
-          status: incident.status,
-          startedAt: incident.startedAt,
-          affectedComponents: incident.affectedComponents,
-          affectedRegions: incident.affectedRegions,
+          incident: buildIncidentPayload(incident),
         }),
       });
 
@@ -203,14 +214,39 @@ function ActiveIncidentBanner({
         throw new Error(data?.error ?? `Request failed (${res.status})`);
       }
 
-      const data: { summary?: string } = await res.json();
-      const text = (data.summary ?? "").trim();
+      const data: { analysis?: { what?: string; action?: string; who?: string } } = await res.json();
+      const analysis = data.analysis;
+      const text = analysis
+        ? [analysis.what, analysis.who && `Affected: ${analysis.who}`, analysis.action && `Action: ${analysis.action}`]
+            .filter(Boolean)
+            .join(" · ")
+        : "";
       if (!text) throw new Error("Empty summary returned");
       setSummary({ status: "ready", text });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to summarize";
       setSummary({ status: "error", error: message });
+    }
+  }
+
+  async function notifySlack() {
+    if (notifyState === "sending") return;
+    setNotifyState("sending");
+    try {
+      const res = await fetch("/api/incident-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          incident: buildIncidentPayload(incident),
+          notify: true,
+        }),
+      });
+      setNotifyState(res.ok ? "sent" : "error");
+      if (res.ok) setTimeout(() => setNotifyState("idle"), 3000);
+    } catch {
+      setNotifyState("error");
+      setTimeout(() => setNotifyState("idle"), 3000);
     }
   }
 
@@ -422,6 +458,61 @@ function ActiveIncidentBanner({
             )}
           </button>
 
+          <button
+            type="button"
+            onClick={notifySlack}
+            disabled={notifyState === "sending"}
+            title="Summarize & send to Slack"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 10,
+              fontWeight: 600,
+              color:
+                notifyState === "sent"
+                  ? "#10b981"
+                  : notifyState === "error"
+                  ? "#ef4444"
+                  : cfg.color,
+              background: "transparent",
+              border: `1px solid ${
+                notifyState === "sent"
+                  ? "rgba(16,185,129,0.4)"
+                  : notifyState === "error"
+                  ? "rgba(239,68,68,0.4)"
+                  : `${cfg.color}40`
+              }`,
+              borderRadius: 999,
+              padding: "3px 9px",
+              cursor: notifyState === "sending" ? "wait" : "pointer",
+              opacity: notifyState === "sending" ? 0.7 : 1,
+              transition: "all 0.15s ease",
+            }}
+          >
+            {notifyState === "sending" ? (
+              <>
+                <Loader2 size={10} style={{ animation: "spin 0.9s linear infinite" }} />
+                Sending...
+              </>
+            ) : notifyState === "sent" ? (
+              <>
+                <CheckCircle size={10} />
+                Sent!
+              </>
+            ) : notifyState === "error" ? (
+              <>
+                <AlertTriangle size={10} />
+                Retry
+              </>
+            ) : (
+              <>
+                <Info size={10} />
+                Notify Slack
+              </>
+            )}
+          </button>
+
           <a
             href={incident.url}
             target="_blank"
@@ -526,6 +617,79 @@ function ActiveIncidentBanner({
         )}
       </div>
     </div>
+  );
+}
+
+// ─── History item notify button ───────────────────────────────────────────────
+
+function HistoryNotifyButton({ incident }: { incident: LiveWatchIncident }) {
+  const [state, setState] = useState<NotifyState>("idle");
+
+  async function notify(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (state === "sending") return;
+    setState("sending");
+    try {
+      const res = await fetch("/api/incident-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          incident: buildIncidentPayload(incident),
+          notify: true,
+        }),
+      });
+      setState(res.ok ? "sent" : "error");
+      if (res.ok) setTimeout(() => setState("idle"), 3000);
+    } catch {
+      setState("error");
+      setTimeout(() => setState("idle"), 3000);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={notify}
+      disabled={state === "sending"}
+      title="Summarize & send to Slack"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 3,
+        padding: "2px 6px",
+        borderRadius: 6,
+        fontSize: 9,
+        fontWeight: 600,
+        background: "transparent",
+        border: `1px solid ${
+          state === "sent"
+            ? "rgba(16,185,129,0.4)"
+            : state === "error"
+            ? "rgba(239,68,68,0.4)"
+            : "var(--border-subtle)"
+        }`,
+        color:
+          state === "sent"
+            ? "#10b981"
+            : state === "error"
+            ? "#ef4444"
+            : "var(--text-muted)",
+        cursor: state === "sending" ? "wait" : "pointer",
+        opacity: state === "sending" ? 0.6 : 1,
+        transition: "all 0.15s ease",
+      }}
+    >
+      {state === "sending" ? (
+        <Loader2 size={9} style={{ animation: "spin 0.9s linear infinite" }} />
+      ) : state === "sent" ? (
+        <CheckCircle size={9} />
+      ) : state === "error" ? (
+        <AlertTriangle size={9} />
+      ) : (
+        <MessageSquare size={9} />
+      )}
+      {state === "sent" ? "Sent!" : state === "error" ? "Retry" : "Notify"}
+    </button>
   );
 }
 
@@ -1039,7 +1203,7 @@ export function SitecoreBreakdown({ products }: Props) {
                                   display: "flex",
                                   flexDirection: "column",
                                   alignItems: "flex-end",
-                                  gap: 2,
+                                  gap: 4,
                                   flexShrink: 0,
                                 }}
                               >
@@ -1062,6 +1226,7 @@ export function SitecoreBreakdown({ products }: Props) {
                                     resolved
                                   </span>
                                 )}
+                                <HistoryNotifyButton incident={inc} />
                               </div>
                             </div>
                           ))}
