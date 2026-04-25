@@ -108,7 +108,7 @@ export function Sidebar({
                 className={`sidebar-nav-item ${isActive ? "active" : ""}`}
                 style={{ width: "100%", border: "none", textAlign: "left" }}
               >
-                <span style={{ color: isActive ? "var(--accent-blue)" : "var(--text-muted)" }}>
+                <span style={{ color: isActive ? "var(--accent-primary)" : "var(--text-muted)" }}>
                   {PLATFORM_ICONS[p.id]}
                 </span>
                 <span style={{ flex: 1 }}>{p.label}</span>

@@ -29,7 +29,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           gap: 8,
         }}
       >
-        <Bell size={14} color="var(--accent-blue)" />
+        <Bell size={14} color="var(--accent-primary)" />
         <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
           Incident Feed
         </span>
@@ -108,7 +108,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
             <SectionHeader
               label="Scheduled Maintenance"
               count={scheduled.length}
-              color="var(--accent-blue)"
+              color="var(--accent-primary)"
             />
             {scheduled.map((inc, i) => (
               <IncidentCard key={inc.id} incident={inc} index={i} />
