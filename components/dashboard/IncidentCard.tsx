@@ -292,22 +292,6 @@ export function IncidentCard({ incident, index = 0 }: Props) {
               <ExternalLink size={11} />
             </a>
           )}
-          <button
-            onClick={handleGenerateSummary}
-            disabled={isSending}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: isSending ? "default" : "pointer",
-              color: isSending ? "var(--accent-primary)" : "var(--text-muted)",
-              display: "flex",
-              opacity: isSending ? 0.6 : 1,
-            }}
-            title="Summarize & Notify Slack"
-          >
-            <MessageSquare size={11} />
-          </button>
         </div>
       </div>
 
@@ -367,25 +351,24 @@ export function IncidentCard({ incident, index = 0 }: Props) {
               fontSize: 11,
               fontWeight: 600,
               cursor: notifyStatus === "sending" ? "wait" : "pointer",
-              border: `1px solid ${
-                notifyStatus === "sent"
+              border: `1px solid ${notifyStatus === "sent"
                   ? "rgba(16,185,129,0.5)"
                   : notifyStatus === "error"
-                  ? "rgba(239,68,68,0.5)"
-                  : "var(--accent-primary)"
-              }`,
+                    ? "rgba(239,68,68,0.5)"
+                    : "var(--accent-primary)"
+                }`,
               background:
                 notifyStatus === "sent"
                   ? "var(--status-green-dim)"
                   : notifyStatus === "error"
-                  ? "var(--status-red-dim)"
-                  : "var(--accent-primary-dim)",
+                    ? "var(--status-red-dim)"
+                    : "var(--accent-primary-dim)",
               color:
                 notifyStatus === "sent"
                   ? "var(--status-green)"
                   : notifyStatus === "error"
-                  ? "var(--status-red)"
-                  : "var(--accent-primary)",
+                    ? "var(--status-red)"
+                    : "var(--accent-primary)",
               transition: "all 0.15s ease",
               opacity: notifyStatus === "sending" ? 0.7 : 1,
             }}
