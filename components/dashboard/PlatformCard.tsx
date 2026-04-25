@@ -59,9 +59,10 @@ const STATUS_COLOR: Record<SystemStatus, string> = {
 interface Props {
   platform: PlatformStatus;
   animationDelay?: number;
+  onNavigate?: () => void;
 }
 
-export function PlatformCard({ platform, animationDelay = 0 }: Props) {
+export function PlatformCard({ platform, animationDelay = 0, onNavigate }: Props) {
   const [expanded, setExpanded] = useState(false);
   const icon = PLATFORM_ICONS[platform.platform];
   const colorVar = platformColorVar(platform.platform);
@@ -85,7 +86,13 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         position: "relative",
         overflow: "hidden",
       }}
-      onClick={() => setExpanded((e) => !e)}
+      onClick={() => {
+        if (onNavigate) {
+          onNavigate();
+        } else {
+          setExpanded((e) => !e);
+        }
+      }}
     >
       {/* Top row */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -171,10 +178,12 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           borderTop: "1px solid var(--border-subtle)",
         }}
       >
-        <StatCell
-          label="Components"
-          value={platform.components.length || "-"}
-        />
+        {platform.platform !== "sitecore" && (
+          <StatCell
+            label="Components"
+            value={platform.components.length || "-"}
+          />
+        )}
         <StatCell
           label="Incidents"
           value={hasIncidents ? platform.activeIncidents.length : "None"}
@@ -283,16 +292,18 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
       )}
 
       {/* Expand toggle */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: 10,
-          color: "var(--text-muted)",
-        }}
-      >
-        {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </div>
+      {!onNavigate && platform.components.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: 10,
+            color: "var(--text-muted)",
+          }}
+        >
+          {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </div>
+      )}
     </div>
   );
 }

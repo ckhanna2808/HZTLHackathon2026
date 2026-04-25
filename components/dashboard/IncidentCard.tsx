@@ -319,7 +319,10 @@ export function IncidentCard({ incident, index = 0 }: Props) {
             </p>
           )}
           {incident.affectedComponents.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+              <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 500 }}>
+                Affected components:
+              </span>
               {incident.affectedComponents.map((c) => (
                 <span
                   key={c}
