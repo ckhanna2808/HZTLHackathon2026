@@ -107,6 +107,8 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
 
   return (
     <div
+      data-component="StatsBar"
+      aria-label="Key performance indicators"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(6, 1fr)",

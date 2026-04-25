@@ -325,7 +325,11 @@ export function Header({
   }, [lastPollAt, nowMs]);
 
   return (
-    <header className="top-header">
+    <header
+      className="top-header"
+      data-component="Header"
+      aria-label="Top header"
+    >
       {/* Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div className="flex items-center">

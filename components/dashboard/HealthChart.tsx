@@ -61,7 +61,12 @@ export function HealthChart({ platforms }: Props) {
   const chartKey = reducedMotion ? "static" : animate ? "animated" : "initial";
 
   return (
-    <div className="glass-card" style={{ padding: "18px 20px" }}>
+    <div
+      className="glass-card"
+      data-component="HealthChart"
+      aria-label="Platform health chart"
+      style={{ padding: "18px 20px" }}
+    >
       <div
         style={{
           display: "flex",

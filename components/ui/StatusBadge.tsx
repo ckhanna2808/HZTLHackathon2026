@@ -51,6 +51,8 @@ export function StatusBadge({ status, size = "md", pulse = true }: Props) {
 
   return (
     <span
+      data-component="StatusBadge"
+      aria-label={`Status: ${info.label}`}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -92,6 +94,8 @@ export function StatusPill({ status }: { status: SystemStatus }) {
   const info = STATUS_MAP[status] ?? STATUS_MAP.unknown;
   return (
     <span
+      data-component="StatusPill"
+      aria-label={`Status: ${info.label}`}
       style={{
         display: "inline-flex",
         alignItems: "center",

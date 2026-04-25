@@ -34,6 +34,8 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
   return (
     <div
       className="glass-card-elevated"
+      data-component="IncidentFeed"
+      aria-label="Incident feed"
       style={{ display: "flex", flexDirection: "column", maxHeight: 600 }}
     >
       {/* Panel header */}
@@ -114,6 +116,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
                 letterSpacing: "0.05em",
                 transition: "all 0.15s",
               }}
+              aria-label={`Sort incidents: ${opt === "default" ? "default" : "newest first"}`}
             >
               {opt === "newest" && <ArrowDownUp size={9} />}
               {opt === "default" ? "Default" : "Newest First"}
