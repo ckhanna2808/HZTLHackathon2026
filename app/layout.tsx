@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HZ LiveWatch — Always Watching. Always Alert.",
+  title: "HZTL LiveWatch — Always Watching. Always Alert.",
   description:
     "Real-time incident monitoring dashboard for Vercel, Netlify, GitHub, Cloudflare, npm and the full Sitecore product suite.",
   keywords: ["incident monitoring", "status dashboard", "Sitecore", "Vercel", "DevOps"],

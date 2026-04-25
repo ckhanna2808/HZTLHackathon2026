@@ -9,15 +9,15 @@ export type Platform =
   | "sitecore";
 
 export type SitecoreProduct =
-  | "xm-cloud"
+  | "ai"
   | "content-hub"
   | "search"
   | "cdp"
   | "personalize"
   | "send"
-  | "ai"
   | "managed-cloud"
-  | "cloud-portal";
+  | "cloud-portal"
+  | "ordercloud";
 
 export type IncidentStatus =
   | "investigating"
@@ -103,7 +103,6 @@ export interface LiveWatchSnapshot {
   platforms: Record<Platform, PlatformStatus>;
   sitecoreProducts: Record<SitecoreProduct, SitecoreProductStatus>;
   activeIncidents: LiveWatchIncident[];
-  incidentHistory: LiveWatchIncident[];
   stats: DashboardStats;
 }
 

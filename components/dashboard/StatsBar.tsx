@@ -1,14 +1,30 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { DashboardStats } from "@/lib/types";
 import { Activity, AlertTriangle, Clock, Layers, Shield, Zap } from "lucide-react";
 
 interface Props {
   stats: DashboardStats;
+  activeIncidentCount?: number; // override: platform-scoped count for the current tab
 }
 
-export function StatsBar({ stats }: Props) {
+export function StatsBar({ stats, activeIncidentCount }: Props) {
+  // Live clock — ticks every second so the "Next Poll" countdown actually counts down.
+  // Without this, Date.now() is evaluated once at render and never updates.
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const healthPct = Math.round((stats.operationalCount / stats.totalPlatforms) * 100);
+  const displayActiveCount = activeIncidentCount ?? stats.activeIncidentCount;
+
+  // Countdown derived from live clock (tick forces re-evaluation every second)
+  const secondsToNextPoll = stats.nextPollAt
+    ? Math.max(0, Math.floor((new Date(stats.nextPollAt).getTime() - Date.now()) / 1000))
+    : null;
 
   const items = [
     {
@@ -24,10 +40,10 @@ export function StatsBar({ stats }: Props) {
     {
       icon: <AlertTriangle size={15} />,
       label: "Active Incidents",
-      value: stats.activeIncidentCount === 0 ? "None" : stats.activeIncidentCount,
+      value: displayActiveCount === 0 ? "None" : displayActiveCount,
       sub: "Right now",
       color:
-        stats.activeIncidentCount === 0 ? "var(--status-green)" : "var(--status-red)",
+        displayActiveCount === 0 ? "var(--status-green)" : "var(--status-red)",
     },
     {
       icon: <Activity size={15} />,
@@ -62,19 +78,18 @@ export function StatsBar({ stats }: Props) {
     {
       icon: <Clock size={15} />,
       label: "Next Poll",
-      value: stats.nextPollAt
-        ? (() => {
-            const s = Math.max(
-              0,
-              Math.floor((new Date(stats.nextPollAt).getTime() - Date.now()) / 1000)
-            );
-            return `${s}s`;
-          })()
-        : "—",
-      sub: "Cron interval",
-      color: "var(--accent-cyan)",
+      // secondsToNextPoll is recomputed every render (tick forces it every 1s)
+      value: secondsToNextPoll !== null ? `${secondsToNextPoll}s` : "—",
+      sub: "Polling interval",
+      color:
+        secondsToNextPoll !== null && secondsToNextPoll <= 10
+          ? "var(--status-yellow)"   // turns yellow in last 10s
+          : "var(--accent-cyan)",
     },
   ];
+
+  // Suppress unused-variable lint for tick — it's only used to force re-renders
+  void tick;
 
   return (
     <div
@@ -121,6 +136,7 @@ export function StatsBar({ stats }: Props) {
               lineHeight: 1,
               letterSpacing: "-0.02em",
               marginBottom: 2,
+              fontVariantNumeric: "tabular-nums",  // prevents layout shift as digits change
             }}
           >
             {item.value}
