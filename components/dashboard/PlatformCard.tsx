@@ -198,7 +198,6 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
             gap: 6,
           }}
         >
-          <AlertCircle size={12} />
           <span style={{ fontWeight: 500 }}>
             {platform.activeIncidents[0].title}
           </span>
@@ -220,57 +219,64 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
               fontWeight: 700,
               letterSpacing: "0.08em",
               color: "var(--text-muted)",
-              marginBottom: 6,
+              marginBottom: 8,
+              textTransform: "uppercase",
             }}
           >
             Components
           </div>
-          {platform.components.slice(0, 12).map((c) => {
-            const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
-            return (
-              <div
-                key={c.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "4px 8px",
-                  borderRadius: 6,
-                  background: "var(--bg-glass)",
-                  fontSize: 12,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: compColor,
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ flex: 1, color: "var(--text-secondary)" }}>
-                  {c.name}
-                </span>
-                <span
-                  style={{ fontSize: 20, color: compColor, fontWeight: 600 }}
-                >
-                  {STATUS_LABEL[c.status]}
-                </span>
-              </div>
-            );
-          })}
-          {platform.components.length > 12 && (
-            <div
-              style={{
-                fontSize: 12,
-                color: "var(--text-muted)",
-                paddingLeft: 8,
-              }}
-            >
-              +{platform.components.length - 12} more components
-            </div>
-          )}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              maxHeight: 240,
+              overflowY: "auto",
+              paddingRight: 4,
+            }}
+          >
+            {[...platform.components]
+              .sort((a, b) => {
+                if (a.status === "operational" && b.status !== "operational") return 1;
+                if (a.status !== "operational" && b.status === "operational") return -1;
+                return 0;
+              })
+              .map((c) => {
+                const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
+                return (
+                  <div
+                    key={c.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "4px 8px",
+                      borderRadius: 6,
+                      background: "var(--bg-glass)",
+                      fontSize: 12,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: compColor,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ flex: 1, color: "var(--text-secondary)" }}>
+                      {c.name}
+                    </span>
+                    <span
+                      style={{ fontSize: 13, color: compColor, fontWeight: 600 }}
+                    >
+                      {STATUS_LABEL[c.status]}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
         </div>
       )}
 

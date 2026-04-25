@@ -161,34 +161,7 @@ export function Sidebar({
           borderTop: "1px solid var(--border-subtle)",
         }}
       >
-        <div
-          style={{
-            padding: "0 16px 10px",
-            fontSize: 16,
 
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            color: "var(--text-muted)",
-            textTransform: "uppercase",
-          }}
-        >
-          Quick Links
-        </div>
-
-        <button
-          className="sidebar-nav-item"
-          style={{ width: "100%", border: "none", textAlign: "left" }}
-          onClick={() => onSelect("incidents")}
-        >
-          <Bell size={14} />
-          <span>Incidents</span>
-          {activeIncidentCount > 0 && (
-            <ChevronRight
-              size={12}
-              style={{ marginLeft: "auto", color: "var(--text-muted)" }}
-            />
-          )}
-        </button>
 
         {/* Global health score */}
         <div

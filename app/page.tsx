@@ -119,9 +119,7 @@ export default function DashboardPage() {
           {isLoading && !snapshot && <StatsBarSkeleton />}
 
           {/* Main dashboard layout */}
-          <div className="dashboard-layout">
-            {/* Left column */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20, minWidth: 0 }}>
               {/* Platform grid header */}
               <div
                 style={{
@@ -207,6 +205,14 @@ export default function DashboardPage() {
                   <SitecoreBreakdown products={snapshot.sitecoreProducts} />
                 )}
 
+              {/* Incident Feed for individual platforms (except sitecore) fully expanded above Health Chart */}
+              {selectedPlatform !== "all" && selectedPlatform !== "sitecore" && (
+                <IncidentFeed
+                  incidents={filteredIncidents}
+                  isLoading={isLoading && !snapshot}
+                />
+              )}
+
               {/* Health chart */}
               {snapshot && platforms.length > 0 && (
                 <HealthChart platforms={platforms} />
@@ -272,24 +278,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
               )}
-            </div>
-
-            {/* Right column - Incident Feed */}
-            <div
-              style={{
-                position: "sticky",
-                top: 80,
-                maxHeight: "calc(100vh - 100px)",
-                overflow: "auto",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <IncidentFeed
-                incidents={filteredIncidents}
-                isLoading={isLoading && !snapshot}
-              />
-            </div>
           </div>
         </main>
       </div>

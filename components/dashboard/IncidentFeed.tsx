@@ -34,7 +34,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
   return (
     <div
       className="glass-card-elevated"
-      style={{ display: "flex", flexDirection: "column", height: "100%" }}
+      style={{ display: "flex", flexDirection: "column", maxHeight: 600 }}
     >
       {/* Panel header */}
       <div
