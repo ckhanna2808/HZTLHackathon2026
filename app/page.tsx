@@ -194,6 +194,11 @@ export default function DashboardPage() {
                         key={p.platform}
                         platform={p}
                         animationDelay={i * 80}
+                        onNavigate={
+                          p.platform === "sitecore"
+                            ? () => setSelectedPlatform("sitecore")
+                            : undefined
+                        }
                       />
                     ))}
               </div>

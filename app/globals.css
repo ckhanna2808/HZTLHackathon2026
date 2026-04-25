@@ -286,13 +286,28 @@ body {
 }
 
 @keyframes activity-draw {
-  0% { stroke-dashoffset: 220; opacity: 0.65; }
-  35% { opacity: 1; }
-  70% { stroke-dashoffset: 0; opacity: 1; }
-  100% { stroke-dashoffset: -220; opacity: 0.65; }
+  0% {
+    stroke-dashoffset: 220;
+    opacity: 0.65;
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: -220;
+    opacity: 0.65;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .activity-live path,
   .activity-live polyline,
   .activity-live line,
@@ -306,18 +321,53 @@ body {
 
 /* ─── LiveWatch eyes (GIF-like frames) ─────────────────────────────────────── */
 @keyframes human-blink-frames {
-  0%, 84%, 100% { opacity: 1; }
-  86%, 90% { opacity: 0; } /* closed hold */
-  92% { opacity: 1; }      /* open */
-  94%, 96% { opacity: 0; } /* quick double-blink */
-  98% { opacity: 1; }
+
+  0%,
+  84%,
+  100% {
+    opacity: 1;
+  }
+
+  86%,
+  90% {
+    opacity: 0;
+  }
+
+  /* closed hold */
+  92% {
+    opacity: 1;
+  }
+
+  /* open */
+  94%,
+  96% {
+    opacity: 0;
+  }
+
+  /* quick double-blink */
+  98% {
+    opacity: 1;
+  }
 }
 
 @keyframes pupil-drift {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(0.6px, -0.4px); }
-  55% { transform: translate(-0.8px, 0.2px); }
-  75% { transform: translate(0.2px, 0.6px); }
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  25% {
+    transform: translate(0.6px, -0.4px);
+  }
+
+  55% {
+    transform: translate(-0.8px, 0.2px);
+  }
+
+  75% {
+    transform: translate(0.2px, 0.6px);
+  }
 }
 
 .live-eyes-human {
@@ -340,18 +390,28 @@ body {
   stroke: rgba(255, 255, 255, 0.18);
   stroke-width: 0.8;
 }
+
 .live-eyes-human-svg .iris {
   fill: color-mix(in srgb, var(--status-green) 55%, #2dd4bf);
   opacity: 0.95;
 }
-.live-eyes-human-svg .pupil { fill: rgba(0, 0, 0, 0.68); }
-.live-eyes-human-svg .spec { fill: rgba(255, 255, 255, 0.9); opacity: 0.85; }
+
+.live-eyes-human-svg .pupil {
+  fill: rgba(0, 0, 0, 0.68);
+}
+
+.live-eyes-human-svg .spec {
+  fill: rgba(255, 255, 255, 0.9);
+  opacity: 0.85;
+}
+
 .live-eyes-human-svg .lid {
   stroke: rgba(255, 255, 255, 0.22);
   stroke-width: 1.1;
   stroke-linecap: round;
   fill: none;
 }
+
 .live-eyes-human-svg .lid-closed {
   stroke: rgba(255, 255, 255, 0.6);
   stroke-width: 1.35;
@@ -362,10 +422,12 @@ body {
 .live-eyes-human-svg .eye-frame.eye-open {
   animation: human-blink-frames 4.8s steps(1, end) infinite;
 }
+
 .live-eyes-human-svg .eye-frame.eye-closed {
   opacity: 0;
   animation: human-blink-frames 4.8s steps(1, end) infinite reverse;
 }
+
 .live-eyes-human-svg .eye-right .eye-frame.eye-open,
 .live-eyes-human-svg .eye-right .eye-frame.eye-closed {
   animation-delay: 160ms;
@@ -379,6 +441,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .live-eyes-human-svg .eye-frame,
   .live-eyes-human-svg .pupil,
   .live-eyes-human-svg .iris,
@@ -594,6 +657,15 @@ body {
       var(--bg-card) 0%,
       var(--bg-glass) 50%,
       var(--bg-card) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+[data-theme="light"] .shimmer {
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.09) 0%,
+      rgba(0, 0, 0, 0.01) 50%,
+      rgba(0, 0, 0, 0.05) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

@@ -8,7 +8,6 @@ import {
   Clock,
   Layers,
   Shield,
-  Zap,
 } from "lucide-react";
 
 interface Props {
@@ -70,16 +69,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
           ? "var(--status-green)"
           : "var(--status-yellow)",
     },
-    {
-      icon: <Zap size={15} />,
-      label: "Avg Resolution",
-      value:
-        stats.avgResolutionMinutes != null
-          ? `${stats.avgResolutionMinutes}m`
-          : "-",
-      sub: "MTTR",
-      color: "var(--accent-primary)",
-    },
+
     {
       icon: <Layers size={15} />,
       label: "Global Health",
@@ -111,7 +101,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
       aria-label="Key performance indicators"
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(6, 1fr)",
+        gridTemplateColumns: "repeat(5, 1fr)",
         gap: 12,
         marginBottom: 24,
       }}
