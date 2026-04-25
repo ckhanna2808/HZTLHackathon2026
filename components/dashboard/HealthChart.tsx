@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,7 +10,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-  Legend,
 } from "recharts";
 import { PlatformStatus } from "@/lib/types";
 import { TrendingUp } from "lucide-react";
@@ -26,12 +26,39 @@ function getHealthColor(health: number): string {
 }
 
 export function HealthChart({ platforms }: Props) {
-  const data = platforms.map((p) => ({
+  const [animate, setAnimate] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+    const t = window.setTimeout(
+      () => {
+        setReducedMotion(prefersReduced);
+        setAnimate(true);
+      },
+      prefersReduced ? 0 : 80,
+    );
+    return () => window.clearTimeout(t);
+  }, []);
+
+  const fullData = platforms.map((p) => ({
     name: p.name,
     health: p.healthPercent,
     incidents: p.activeIncidents.length,
     color: getHealthColor(p.healthPercent),
   }));
+
+  // Force a clean "bottom → up" grow animation on first paint:
+  // render bars at 0 first, then switch to real values.
+  const data =
+    animate || reducedMotion
+      ? fullData
+      : fullData.map((d) => ({ ...d, health: 0 }));
+
+  // Recharts animations are most reliable on mount. We intentionally remount once
+  // after the initial paint so bars always grow bottom → top on load.
+  const chartKey = reducedMotion ? "static" : animate ? "animated" : "initial";
 
   return (
     <div className="glass-card" style={{ padding: "18px 20px" }}>
@@ -44,13 +71,20 @@ export function HealthChart({ platforms }: Props) {
         }}
       >
         <TrendingUp size={15} color="var(--accent-primary)" />
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            textTransform: "uppercase",
+          }}
+        >
           Platform Health Overview
         </span>
         <span
           style={{
             marginLeft: "auto",
-            fontSize: 11,
+            fontSize: 15,
             color: "var(--text-muted)",
           }}
         >
@@ -59,7 +93,12 @@ export function HealthChart({ platforms }: Props) {
       </div>
 
       <ResponsiveContainer width="100%" height={180}>
-        <BarChart data={data} barSize={32} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+        <BarChart
+          key={chartKey}
+          data={data}
+          barSize={32}
+          margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+        >
           <CartesianGrid
             vertical={false}
             stroke="rgba(255,255,255,0.05)"
@@ -67,13 +106,13 @@ export function HealthChart({ platforms }: Props) {
           />
           <XAxis
             dataKey="name"
-            tick={{ fontSize: 11, fill: "var(--text-muted)", fontWeight: 500 }}
+            tick={{ fontSize: 15, fill: "var(--text-muted)", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+            tick={{ fontSize: 15, fill: "var(--text-muted)" }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => `${v}%`}
@@ -83,11 +122,15 @@ export function HealthChart({ platforms }: Props) {
               background: "var(--bg-secondary)",
               border: "1px solid var(--border-default)",
               borderRadius: 10,
-              fontSize: 12,
+              fontSize: 15,
               color: "var(--text-primary)",
               boxShadow: "var(--shadow-elevated)",
             }}
-            labelStyle={{ fontWeight: 700, marginBottom: 4, color: "var(--text-primary)" }}
+            labelStyle={{
+              fontWeight: 700,
+              marginBottom: 4,
+              color: "var(--text-primary)",
+            }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(value: any, name: any) => [
               name === "health" ? `${value}%` : value,
@@ -95,9 +138,20 @@ export function HealthChart({ platforms }: Props) {
             ]}
             cursor={{ fill: "rgba(255,255,255,0.03)", radius: 6 }}
           />
-          <Bar dataKey="health" radius={[6, 6, 0, 0]}>
+          <Bar
+            dataKey="health"
+            radius={[6, 6, 0, 0]}
+            isAnimationActive={!reducedMotion}
+            animationBegin={0}
+            animationDuration={2800}
+            animationEasing="cubic-bezier(0.16, 1, 0.3, 1)"
+          >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.85} />
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.color}
+                fillOpacity={0.85}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -121,7 +175,13 @@ export function HealthChart({ platforms }: Props) {
         ].map((item) => (
           <div
             key={item.label}
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 10, color: "var(--text-muted)" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 15,
+              color: "var(--text-muted)",
+            }}
           >
             <span
               style={{

@@ -1,7 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Activity, Bell, RefreshCw, Wifi, WifiOff, Sun, Moon, Clock, ChevronDown, Check } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useMemo, useState } from "react";
+import {
+  Activity,
+  Bell,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  Sun,
+  Moon,
+  Clock,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 import {
   useTheme,
   useDisplayTimezone,
@@ -36,7 +48,10 @@ function TimezoneDropdown() {
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -47,7 +62,9 @@ function TimezoneDropdown() {
   // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
@@ -168,14 +185,19 @@ function TimezoneDropdown() {
                 key={tz}
                 role="option"
                 aria-selected={isActive}
-                onClick={() => { setTimezone(tz); setOpen(false); }}
+                onClick={() => {
+                  setTimezone(tz);
+                  setOpen(false);
+                }}
                 style={{
                   width: "100%",
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
                   padding: "9px 14px",
-                  background: isActive ? "var(--accent-primary-dim)" : "transparent",
+                  background: isActive
+                    ? "var(--accent-primary-dim)"
+                    : "transparent",
                   border: "none",
                   borderBottom: "1px solid var(--border-subtle)",
                   cursor: "pointer",
@@ -183,14 +205,24 @@ function TimezoneDropdown() {
                   transition: "background 120ms ease",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "var(--bg-glass)";
+                  if (!isActive)
+                    (e.currentTarget as HTMLElement).style.background =
+                      "var(--bg-glass)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.background = "transparent";
+                  if (!isActive)
+                    (e.currentTarget as HTMLElement).style.background =
+                      "transparent";
                 }}
               >
                 {/* Checkmark */}
-                <span style={{ width: 14, flexShrink: 0, color: "var(--accent-primary)" }}>
+                <span
+                  style={{
+                    width: 14,
+                    flexShrink: 0,
+                    color: "var(--accent-primary)",
+                  }}
+                >
                   {isActive && <Check size={13} strokeWidth={2.5} />}
                 </span>
 
@@ -201,7 +233,9 @@ function TimezoneDropdown() {
                       display: "block",
                       fontSize: 13,
                       fontWeight: isActive ? 600 : 500,
-                      color: isActive ? "var(--accent-primary)" : "var(--text-primary)",
+                      color: isActive
+                        ? "var(--accent-primary)"
+                        : "var(--text-primary)",
                       lineHeight: 1.3,
                     }}
                   >
@@ -214,7 +248,9 @@ function TimezoneDropdown() {
                   className="font-mono"
                   style={{
                     fontSize: 12,
-                    color: isActive ? "var(--accent-primary)" : "var(--text-muted)",
+                    color: isActive
+                      ? "var(--accent-primary)"
+                      : "var(--text-muted)",
                     fontWeight: 500,
                     flexShrink: 0,
                   }}
@@ -250,53 +286,70 @@ export function Header({
   isLoading,
   onRefresh,
 }: HeaderProps) {
+  const [nowMs, setNowMs] = useState<number | null>(null);
   const [online, setOnline] = useState(true);
   const { theme, toggleTheme, mounted } = useTheme();
 
   useEffect(() => {
+    const tick = () => setNowMs(Date.now());
+    const init = window.setTimeout(tick, 0);
+    const timer = window.setInterval(tick, 1000);
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     return () => {
+      window.clearTimeout(init);
+      window.clearInterval(timer);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
     };
   }, []);
 
-  const relativeLastPoll = lastPollAt
-    ? (() => {
-        const diff = Math.floor((Date.now() - new Date(lastPollAt).getTime()) / 1000);
-        if (diff < 5) return "just now";
-        if (diff < 60) return `${diff}s ago`;
-        return `${Math.floor(diff / 60)}m ago`;
-      })()
-    : "-";
+  const utcTime = useMemo(() => {
+    if (nowMs == null) return "--:--:--";
+    return new Date(nowMs).toLocaleTimeString("en-GB", {
+      timeZone: "UTC",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }, [nowMs]);
+
+  const relativeLastPoll = useMemo(() => {
+    if (!lastPollAt || nowMs == null) return "—";
+    const diff = Math.floor((nowMs - new Date(lastPollAt).getTime()) / 1000);
+    if (diff < 5) return "just now";
+    if (diff < 60) return `${diff}s ago`;
+    return `${Math.floor(diff / 60)}m ago`;
+  }, [lastPollAt, nowMs]);
 
   return (
     <header className="top-header">
       {/* Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 9,
-            background: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "var(--shadow-glow-blue)",
-            flexShrink: 0,
-          }}
-        >
-          <Activity size={16} color="#fff" />
-        </div>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            <span className="text-gradient-hero">HZTL LiveWatch</span>
+        <div className="flex items-center">
+          <div>
+            <Image
+              src="/img/headerlogo.png"
+              alt="HZTL LiveWatch logo"
+              width={80}
+              height={60}
+              priority
+            />
           </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", fontWeight: 500 }}>
+          <div className="heading-2">
+            <span className="text-gradient-hero mx-2 font-bold">
+              HZTL LiveWatch
+            </span>
+          </div>
+          <div className="mx-1">
+            <Activity size={25} className="activity-live" />
+          </div>
+          <div
+            className="label-caps"
+            style={{ fontWeight: 500, letterSpacing: "0.08em" }}
+          >
             ALWAYS WATCHING
           </div>
         </div>
@@ -307,31 +360,43 @@ export function Header({
 
       {/* Right-side controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <TimezoneDropdown />
         {/* Network status */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 5,
-            fontSize: 12,
-            fontWeight: 500,
             color: online ? "var(--status-green)" : "var(--status-red)",
           }}
+          className="text-sm"
         >
           {online ? <Wifi size={13} /> : <WifiOff size={13} />}
           <span>{online ? "Live" : "Offline"}</span>
         </div>
 
         {/* Last polled */}
-        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+        <div className="text-sm muted">
           Polled{" "}
-          <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+          <span className="secondary" style={{ fontWeight: 500 }}>
             {relativeLastPoll}
           </span>
         </div>
 
-        {/* Timezone dropdown (clock + selector) */}
-        <TimezoneDropdown />
+        {/* UTC Clock */}
+        <div
+          className="font-mono"
+          style={{
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            background: "var(--bg-glass)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: 6,
+            padding: "4px 10px",
+          }}
+        >
+          {utcTime} <span className="muted text-xs">UTC</span>
+        </div>
 
         {/* Active incidents badge */}
         {activeIncidentCount > 0 && (
@@ -339,15 +404,11 @@ export function Header({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              padding: "5px 12px",
-              borderRadius: 999,
               background: "var(--status-red-dim)",
-              border: "1px solid color-mix(in srgb, var(--status-red) 35%, transparent)",
-              fontSize: 12,
-              fontWeight: 600,
+              border: "1px solid rgba(239,68,68,0.35)",
               color: "var(--status-red)",
             }}
+            className="pill-inline"
           >
             <Bell size={12} />
             <span>{activeIncidentCount} Active</span>
@@ -368,13 +429,14 @@ export function Header({
           id="refresh-btn"
           onClick={onRefresh}
           disabled={isLoading}
-          className="theme-toggle"
-          title="Refresh data"
-          aria-label="Refresh data"
+          className="btn-icon"
+          title="Refresh now"
         >
           <RefreshCw
             size={14}
-            style={{ animation: isLoading ? "spin-slow 1s linear infinite" : "none" }}
+            style={{
+              animation: isLoading ? "spin-slow 1s linear infinite" : "none",
+            }}
           />
         </button>
 
@@ -383,8 +445,12 @@ export function Header({
           id="theme-toggle-btn"
           onClick={toggleTheme}
           className="theme-toggle"
-          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          }
+          aria-label={
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          }
         >
           {mounted && theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
         </button>

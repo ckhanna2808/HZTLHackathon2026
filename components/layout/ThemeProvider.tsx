@@ -15,8 +15,8 @@ export type DisplayTimezone = "UTC" | "IST" | "GST" | "EST";
 /** Maps our display label → IANA timezone string used by Intl.DateTimeFormat */
 export const TZ_IANA: Record<DisplayTimezone, string> = {
   UTC: "UTC",
-  IST: "Asia/Kolkata",     // UTC +5:30 - India Standard Time
-  GST: "Asia/Dubai",       // UTC +4:00 - Gulf Standard Time
+  IST: "Asia/Kolkata", // UTC +5:30 - India Standard Time
+  GST: "Asia/Dubai", // UTC +4:00 - Gulf Standard Time
   EST: "America/New_York", // UTC -5:00 (winter) / -4:00 EDT (summer)
 };
 
@@ -62,7 +62,8 @@ export function useTheme() {
 }
 
 export function useDisplayTimezone() {
-  const { displayTz, setTimezone, cycleTimezone, mounted } = useContext(AppPrefsContext);
+  const { displayTz, setTimezone, cycleTimezone, mounted } =
+    useContext(AppPrefsContext);
   return { displayTz, setTimezone, cycleTimezone, mounted };
 }
 
@@ -89,36 +90,55 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Read persisted preferences once on mount
   useEffect(() => {
-    try {
-      const storedTheme = localStorage.getItem("hz-livewatch-theme") as Theme | null;
-      if (storedTheme === "light" || storedTheme === "dark") {
-        setTheme(storedTheme);
-      } else {
-        setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-      }
+    const t = window.setTimeout(() => {
+      try {
+        const storedTheme = localStorage.getItem(
+          "hz-livewatch-theme",
+        ) as Theme | null;
+        if (storedTheme === "light" || storedTheme === "dark") {
+          setTheme(storedTheme);
+        } else {
+          setTheme(
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light",
+          );
+        }
 
-      const storedTz = localStorage.getItem("hz-livewatch-tz") as DisplayTimezone | null;
-      if (storedTz && TZ_CYCLE.includes(storedTz)) {
-        setDisplayTz(storedTz);
+        const storedTz = localStorage.getItem(
+          "hz-livewatch-tz",
+        ) as DisplayTimezone | null;
+        if (storedTz && TZ_CYCLE.includes(storedTz)) {
+          setDisplayTz(storedTz);
+        }
+        // If nothing stored, default stays "UTC" - safest default for a monitoring tool
+      } catch {
+        // localStorage unavailable (private mode edge case) - use defaults
       }
-      // If nothing stored, default stays "UTC" - safest default for a monitoring tool
-    } catch {
-      // localStorage unavailable (SSR / private mode edge case) - use defaults
-    }
-    setMounted(true);
+      setMounted(true);
+    }, 0);
+    return () => window.clearTimeout(t);
   }, []);
 
   // Persist theme to DOM + localStorage
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.setAttribute("data-theme", theme);
-    try { localStorage.setItem("hz-livewatch-theme", theme); } catch { /* noop */ }
+    try {
+      localStorage.setItem("hz-livewatch-theme", theme);
+    } catch {
+      /* noop */
+    }
   }, [theme, mounted]);
 
   // Persist timezone to localStorage
   useEffect(() => {
     if (!mounted) return;
-    try { localStorage.setItem("hz-livewatch-tz", displayTz); } catch { /* noop */ }
+    try {
+      localStorage.setItem("hz-livewatch-tz", displayTz);
+    } catch {
+      /* noop */
+    }
   }, [displayTz, mounted]);
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
@@ -132,7 +152,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
 
   return (
-    <AppPrefsContext.Provider value={{ theme, toggleTheme, displayTz, setTimezone, cycleTimezone, mounted }}>
+    <AppPrefsContext.Provider
+      value={{
+        theme,
+        toggleTheme,
+        displayTz,
+        setTimezone,
+        cycleTimezone,
+        mounted,
+      }}
+    >
       {children}
     </AppPrefsContext.Provider>
   );

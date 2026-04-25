@@ -4,6 +4,7 @@ import { useState } from "react";
 import { LiveWatchIncident } from "@/lib/types";
 import { IncidentCard } from "./IncidentCard";
 import { ArrowDownUp, Bell, Rss } from "lucide-react";
+import { Reveal } from "@/components/ui/Reveal";
 
 interface Props {
   incidents: LiveWatchIncident[];
@@ -15,15 +16,21 @@ type SortOrder = "default" | "newest";
 function sortIncidents(list: LiveWatchIncident[], order: SortOrder) {
   if (order === "default") return list;
   return [...list].sort(
-    (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+    (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
   );
 }
 
 export function IncidentFeed({ incidents, isLoading }: Props) {
   const [sortOrder, setSortOrder] = useState<SortOrder>("default");
 
-  const active    = sortIncidents(incidents.filter((i) => i.status !== "resolved"), sortOrder);
-  const resolved  = sortIncidents(incidents.filter((i) => i.status === "resolved"), sortOrder);
+  const active = sortIncidents(
+    incidents.filter((i) => i.status !== "resolved"),
+    sortOrder,
+  );
+  const resolved = sortIncidents(
+    incidents.filter((i) => i.status === "resolved"),
+    sortOrder,
+  );
 
   return (
     <div
@@ -42,7 +49,13 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
         }}
       >
         <Bell size={14} color="var(--accent-primary)" />
-        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+          }}
+        >
           Incident Feed
         </span>
 
@@ -51,7 +64,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
             style={{
               background: "var(--status-red)",
               color: "#fff",
-              fontSize: 11,
+              fontSize: 15,
               fontWeight: 700,
               borderRadius: 999,
               padding: "2px 8px",
@@ -87,8 +100,14 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
                 padding: "3px 9px",
                 borderRadius: 6,
                 border: `1px solid ${sortOrder === opt ? "var(--accent-primary)" : "var(--border-subtle)"}`,
-                background: sortOrder === opt ? "var(--accent-primary-dim)" : "transparent",
-                color: sortOrder === opt ? "var(--accent-primary)" : "var(--text-muted)",
+                background:
+                  sortOrder === opt
+                    ? "var(--accent-primary-dim)"
+                    : "transparent",
+                color:
+                  sortOrder === opt
+                    ? "var(--accent-primary)"
+                    : "var(--text-muted)",
                 fontSize: 10,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -118,7 +137,11 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
         {isLoading && incidents.length === 0 && (
           <>
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="shimmer" style={{ height: 80, borderRadius: 10 }} />
+              <div
+                key={i}
+                className="shimmer"
+                style={{ height: 80, borderRadius: 10 }}
+              />
             ))}
           </>
         )}
@@ -127,18 +150,30 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
 
         {/* Active */}
         {active.length > 0 && (
-          <SectionHeader label="Active" count={active.length} color="var(--status-red)" />
+          <SectionHeader
+            label="Active"
+            count={active.length}
+            color="var(--status-red)"
+          />
         )}
         {active.map((inc, i) => (
-          <IncidentCard key={inc.id} incident={inc} index={i} />
+          <Reveal key={inc.id} delayMs={i * 55}>
+            <IncidentCard incident={inc} index={i} />
+          </Reveal>
         ))}
 
         {/* Resolved */}
         {resolved.length > 0 && (
           <>
-            <SectionHeader label="Resolved" count={resolved.length} color="var(--status-green)" />
+            <SectionHeader
+              label="Resolved"
+              count={resolved.length}
+              color="var(--status-green)"
+            />
             {resolved.map((inc, i) => (
-              <IncidentCard key={inc.id} incident={inc} index={i} />
+              <Reveal key={inc.id} delayMs={i * 55}>
+                <IncidentCard incident={inc} index={i} />
+              </Reveal>
             ))}
           </>
         )}
@@ -152,7 +187,7 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           display: "flex",
           alignItems: "center",
           gap: 6,
-          fontSize: 11,
+          fontSize: 15,
           color: "var(--text-muted)",
         }}
       >
@@ -165,13 +200,29 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
 
 // ─── Section header ───────────────────────────────────────────────────────────
 
-function SectionHeader({ label, count, color }: { label: string; count: number; color: string }) {
+function SectionHeader({
+  label,
+  count,
+  color,
+}: {
+  label: string;
+  count: number;
+  color: string;
+}) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, paddingBottom: 4, marginTop: 4 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        paddingBottom: 4,
+        marginTop: 4,
+      }}
+    >
       <div style={{ height: 1, flex: 1, background: "var(--border-subtle)" }} />
       <span
         style={{
-          fontSize: 10,
+          fontSize: 15,
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.08em",
@@ -227,10 +278,19 @@ function AllClearState() {
         <Bell size={24} color="var(--status-green)" />
       </div>
       <div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
+        <div
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: 4,
+          }}
+        >
           All Clear
         </div>
-        <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
+        <div
+          style={{ fontSize: 16, color: "var(--text-muted)", lineHeight: 1.5 }}
+        >
           No active incidents detected
           <br />
           across monitored platforms

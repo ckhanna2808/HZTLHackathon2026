@@ -100,7 +100,8 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
             justifyContent: "center",
             color: colorVar,
             flexShrink: 0,
-            transition: "background 220ms ease, border-color 220ms ease, color 220ms ease",
+            transition:
+              "background 220ms ease, border-color 220ms ease, color 220ms ease",
           }}
         >
           {icon}
@@ -123,7 +124,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           </div>
           <div
             style={{
-              fontSize: 12,
+              fontSize: 15,
               fontWeight: 500,
               color: statusColor,
               marginTop: 2,
@@ -140,7 +141,8 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
                 background: statusColor,
                 display: "inline-block",
                 flexShrink: 0,
-                ...(platform.status !== "operational" && platform.status !== "unknown"
+                ...(platform.status !== "operational" &&
+                platform.status !== "unknown"
                   ? { animation: "pulse-dot 1.8s ease-in-out infinite" }
                   : {}),
               }}
@@ -150,7 +152,11 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         </div>
 
         {/* Ring */}
-        <RingProgress value={platform.healthPercent} size={56} strokeWidth={4} />
+        <RingProgress
+          value={platform.healthPercent}
+          size={56}
+          strokeWidth={4}
+        />
       </div>
 
       {/* Stats row */}
@@ -185,7 +191,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
             borderRadius: 8,
             background: "rgba(239,68,68,0.08)",
             border: "1px solid rgba(239,68,68,0.2)",
-            fontSize: 12,
+            fontSize: 15,
             color: "var(--status-red)",
             display: "flex",
             alignItems: "center",
@@ -210,7 +216,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         >
           <div
             style={{
-              fontSize: 11,
+              fontSize: 15,
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
@@ -220,62 +226,54 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           >
             Components
           </div>
-          {/* Scrollable - shows ALL components, non-operational sorted first */}
-          <div
-            style={{
-              maxHeight: 220,
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: 3,
-              paddingRight: 2,
-            }}
-          >
-            {[...platform.components]
-              .sort((a, b) => {
-                // Non-operational first
-                const order = { major_outage: 0, partial_outage: 1, degraded_performance: 2, operational: 3, unknown: 4 };
-                return (order[a.status] ?? 4) - (order[b.status] ?? 4);
-              })
-              .map((c) => {
-                const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
-                return (
-                  <div
-                    key={c.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      background: "var(--bg-glass)",
-                      fontSize: 12,
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: compColor,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span style={{ flex: 1, color: "var(--text-secondary)" }}>{c.name}</span>
-                    <span style={{ fontSize: 10, color: compColor, fontWeight: 600 }}>
-                      {STATUS_LABEL[c.status]}
-                    </span>
-                  </div>
-                );
-              })}
-          </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, textAlign: "right" }}>
-            {platform.components.length} components total
-          </div>
+          {platform.components.slice(0, 12).map((c) => {
+            const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
+            return (
+              <div
+                key={c.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  background: "var(--bg-glass)",
+                  fontSize: 15,
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: compColor,
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ flex: 1, color: "var(--text-secondary)" }}>
+                  {c.name}
+                </span>
+                <span
+                  style={{ fontSize: 20, color: compColor, fontWeight: 600 }}
+                >
+                  {STATUS_LABEL[c.status]}
+                </span>
+              </div>
+            );
+          })}
+          {platform.components.length > 12 && (
+            <div
+              style={{
+                fontSize: 15,
+                color: "var(--text-muted)",
+                paddingLeft: 8,
+              }}
+            >
+              +{platform.components.length - 12} more components
+            </div>
+          )}
         </div>
       )}
-
 
       {/* Expand toggle */}
       <div
@@ -309,14 +307,21 @@ function StatCell({
     <div style={{ flex: 1, textAlign: "center" }}>
       <div
         style={{
-          fontSize: small ? 11 : 14,
+          fontSize: small ? 12 : 16,
           fontWeight: 700,
           color: highlight ? color : "var(--text-primary)",
         }}
       >
         {value}
       </div>
-      <div style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 500, marginTop: 1 }}>
+      <div
+        style={{
+          fontSize: 10,
+          color: "var(--text-muted)",
+          fontWeight: 500,
+          marginTop: 1,
+        }}
+      >
         {label}
       </div>
     </div>

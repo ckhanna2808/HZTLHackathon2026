@@ -98,7 +98,7 @@ export function StatusPill({ status }: { status: SystemStatus }) {
         gap: 5,
         padding: "3px 10px",
         borderRadius: "999px",
-        fontSize: "11px",
+        fontSize: "15px",
         fontWeight: 600,
         letterSpacing: "0.04em",
         textTransform: "uppercase",

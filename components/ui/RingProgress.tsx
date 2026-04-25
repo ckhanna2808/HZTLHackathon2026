@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 interface RingProgressProps {
   value: number; // 0-100
   size?: number;
@@ -22,7 +24,17 @@ export function RingProgress({
   const clampedValue = Math.min(100, Math.max(0, value));
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (clampedValue / 100) * circumference;
+  const targetOffset = circumference - (clampedValue / 100) * circumference;
+
+  const [isAnimatedIn, setIsAnimatedIn] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    // Small delay lets the browser paint the initial (empty) ring first.
+    const t = window.setTimeout(() => setIsAnimatedIn(true), prefersReduced ? 0 : 80);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // Auto-color by health
   const ringColor =
@@ -74,8 +86,11 @@ export function RingProgress({
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.8s ease, stroke 0.3s ease" }}
+          strokeDashoffset={isAnimatedIn ? targetOffset : circumference}
+          style={{
+            transition:
+              "stroke-dashoffset 1800ms cubic-bezier(0.22, 1, 0.36, 1), stroke 450ms ease",
+          }}
         />
       </svg>
       {/* Center label */}

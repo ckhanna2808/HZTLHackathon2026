@@ -10,6 +10,7 @@ import { PlatformCard } from "@/components/dashboard/PlatformCard";
 import { IncidentFeed } from "@/components/dashboard/IncidentFeed";
 import { SitecoreBreakdown } from "@/components/dashboard/SitecoreBreakdown";
 import { HealthChart } from "@/components/dashboard/HealthChart";
+import { Reveal } from "@/components/ui/Reveal";
 
 // ─── Data Fetcher ─────────────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ async function fetcher(url: string): Promise<LiveWatchSnapshot> {
 
 export default function DashboardPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
+  // Reserved for future "copy embed" UX; currently unused.
 
   const {
     data: snapshot,
@@ -30,11 +32,11 @@ export default function DashboardPage() {
     isValidating,
     mutate,
   } = useSWR<LiveWatchSnapshot>("/api/status", fetcher, {
-    refreshInterval: 60_000,          // poll every 60s (matches API cache)
-    revalidateOnFocus: false,         // ← STOP: was causing flicker on tab switch
+    refreshInterval: 60_000, // poll every 60s (matches API cache)
+    revalidateOnFocus: false, // ← STOP: was causing flicker on tab switch
     revalidateOnReconnect: true,
-    dedupingInterval: 55_000,         // don't double-fetch within 55s window
-    keepPreviousData: true,           // always show last good data while fetching
+    dedupingInterval: 55_000, // don't double-fetch within 55s window
+    keepPreviousData: true, // always show last good data while fetching
     errorRetryCount: 3,
     errorRetryInterval: 5_000,
   });
@@ -42,6 +44,8 @@ export default function DashboardPage() {
   const handleRefresh = useCallback(() => {
     mutate();
   }, [mutate]);
+
+  // Copy embed removed from UI per request.
 
   // Derived values
   const platforms = snapshot ? Object.values(snapshot.platforms) : [];
@@ -62,7 +66,8 @@ export default function DashboardPage() {
   const globalHealth =
     platforms.length > 0
       ? Math.round(
-          platforms.reduce((sum, p) => sum + p.healthPercent, 0) / platforms.length
+          platforms.reduce((sum, p) => sum + p.healthPercent, 0) /
+            platforms.length,
         )
       : 100;
 
@@ -73,17 +78,17 @@ export default function DashboardPage() {
   const allActiveIncidents = snapshot?.activeIncidents ?? [];
   const filteredIncidents =
     selectedPlatform === "all"
-      ? allActiveIncidents   // global: active only
+      ? allActiveIncidents // global: active only
       : selectedPlatform === "sitecore"
-      ? allActiveIncidents.filter((i) => i.source === "sitecore")  // sitecore active pubs
-      : (snapshot?.platforms[selectedPlatform as Platform]?.activeIncidents ?? []);
+        ? allActiveIncidents.filter((i) => i.source === "sitecore") // sitecore active pubs
+        : (snapshot?.platforms[selectedPlatform as Platform]?.activeIncidents ??
+          []);
   // ↑ platform-specific tab: use platform.activeIncidents which includes resolved history
 
   // Badge / header count - always shows only ACTIVE (non-resolved) for the current view
-  const activeCount = filteredIncidents.filter((i) => i.status !== "resolved").length;
-
-  // Global count is only used for the stats bar (always shows totals).
-  const globalActiveCount = snapshot?.stats.activeIncidentCount ?? 0;
+  const activeCount = filteredIncidents.filter(
+    (i) => i.status !== "resolved",
+  ).length;
 
   return (
     <div className="app-shell">
@@ -109,7 +114,14 @@ export default function DashboardPage() {
         {/* Page content */}
         <main className="page-content">
           {/* Stats bar */}
-          {snapshot && <StatsBar stats={snapshot.stats} activeIncidentCount={activeCount} />}
+          {snapshot && (
+            <Reveal>
+              <StatsBar
+                stats={snapshot.stats}
+                activeIncidentCount={activeCount}
+              />
+            </Reveal>
+          )}
           {isLoading && !snapshot && <StatsBarSkeleton />}
 
           {/* Main dashboard layout */}
@@ -117,7 +129,13 @@ export default function DashboardPage() {
             {/* Left column */}
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {/* Platform grid header */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <div>
                   <h1
                     style={{
@@ -128,11 +146,13 @@ export default function DashboardPage() {
                       letterSpacing: "-0.02em",
                     }}
                   >
-                    {selectedPlatform === "all" ? "All Platforms" : filteredPlatforms[0]?.name ?? "Platform"}
+                    {selectedPlatform === "all"
+                      ? "All Platforms"
+                      : (filteredPlatforms[0]?.name ?? "Platform")}
                   </h1>
                   <p
                     style={{
-                      fontSize: 12,
+                      fontSize: 15,
                       color: "var(--text-muted)",
                       margin: "2px 0 0",
                     }}
@@ -149,7 +169,7 @@ export default function DashboardPage() {
                     style={{
                       padding: "5px 14px",
                       borderRadius: 999,
-                      fontSize: 12,
+                      fontSize: 15,
                       fontWeight: 600,
                       ...(activeCount === 0
                         ? {
@@ -174,105 +194,114 @@ export default function DashboardPage() {
               {/* Platform cards grid */}
               <div className="platform-grid">
                 {isLoading && !snapshot
-                  ? [...Array(6)].map((_, i) => <PlatformCardSkeleton key={i} />)
+                  ? [...Array(6)].map((_, i) => (
+                      <PlatformCardSkeleton key={i} />
+                    ))
                   : filteredPlatforms.map((p, i) => (
-                      <PlatformCard key={p.platform} platform={p} animationDelay={i * 80} />
+                      <Reveal key={p.platform} delayMs={i * 70}>
+                        <PlatformCard platform={p} animationDelay={0} />
+                      </Reveal>
                     ))}
               </div>
 
               {/* Sitecore product breakdown */}
-              {snapshot && (selectedPlatform === "all" || selectedPlatform === "sitecore") && (
-                <SitecoreBreakdown products={snapshot.sitecoreProducts} />
-              )}
+              {snapshot &&
+                (selectedPlatform === "all" ||
+                  selectedPlatform === "sitecore") && (
+                  <Reveal>
+                    <SitecoreBreakdown products={snapshot.sitecoreProducts} />
+                  </Reveal>
+                )}
 
               {/* Health chart */}
               {snapshot && platforms.length > 0 && (
-                <HealthChart platforms={platforms} />
+                <Reveal>
+                  <HealthChart platforms={platforms} />
+                </Reveal>
               )}
 
               {/* Embeddable Status Badges - code snippets only, no rendered images */}
               {snapshot && (
-                <div className="glass-card" style={{ padding: "18px 20px" }}>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                      marginBottom: 12,
-                    }}
-                  >
-                    📌 Embeddable Status Badges
+                <Reveal>
+                  <div className="glass-card" style={{ padding: "18px 20px" }}>
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "var(--text-primary)",
+                        marginBottom: 12,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      📌 Embeddable Status Badges
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      {["vercel", "netlify", "github", "cloudflare", "npm"].map(
+                        (p) => (
+                          <div key={p} className="badge-row">
+                            {/* next/image blocks SVGs by default; these badges are SVGs from an API route */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`/api/badge/${p}`}
+                              alt={`${p} status badge`}
+                              style={{
+                                height: 20,
+                                width: "auto",
+                                display: "block",
+                              }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 650,
+                                  color: "var(--text-primary)",
+                                }}
+                              >
+                                {p.toUpperCase()}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: 11,
+                                  color: "var(--text-muted)",
+                                  marginTop: 1,
+                                }}
+                              >
+                                Embeddable status badge
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {(["vercel", "netlify", "github", "cloudflare", "npm"] as const).map((p) => {
-                      const platform = snapshot.platforms[p];
-                      const statusColor =
-                        platform?.status === "operational"         ? "var(--status-green)"  :
-                        platform?.status === "degraded_performance"? "var(--status-yellow)" :
-                        platform?.status === "partial_outage"      ? "var(--status-orange)" :
-                        platform?.status === "major_outage"        ? "var(--status-red)"    :
-                        "var(--status-gray)";
-                      const statusLabel =
-                        platform?.status === "operational"          ? "Operational"         :
-                        platform?.status === "degraded_performance" ? "Degraded"            :
-                        platform?.status === "partial_outage"       ? "Partial Outage"      :
-                        platform?.status === "major_outage"         ? "Major Outage"        :
-                        "Unknown";
-                      return (
-                        <div
-                          key={p}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                            padding: "8px 12px",
-                            borderRadius: 8,
-                            background: "var(--bg-glass)",
-                            border: "1px solid var(--border-subtle)",
-                          }}
-                        >
-                          {/* Platform name */}
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 700,
-                              color: "var(--text-primary)",
-                              minWidth: 72,
-                              textTransform: "capitalize",
-                            }}
-                          >
-                            {p}
-                          </span>
-                          {/* Live status pill */}
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              color: statusColor,
-                              background: `${statusColor}18`,
-                              border: `1px solid ${statusColor}35`,
-                              borderRadius: 999,
-                              padding: "1px 8px",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {statusLabel}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                </Reveal>
               )}
-
             </div>
 
             {/* Right column - Incident Feed */}
-            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column" }}>
-              <IncidentFeed
-                incidents={filteredIncidents}
-                isLoading={isLoading && !snapshot}
-              />
+            <div
+              style={{
+                position: "sticky",
+                top: 80,
+                maxHeight: "calc(100vh - 100px)",
+                overflow: "auto",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Reveal>
+                <IncidentFeed
+                  incidents={filteredIncidents}
+                  isLoading={isLoading && !snapshot}
+                />
+              </Reveal>
             </div>
           </div>
         </main>
@@ -285,7 +314,10 @@ export default function DashboardPage() {
 
 function PlatformCardSkeleton() {
   return (
-    <div className="glass-card shimmer" style={{ height: 160, borderRadius: 14 }} />
+    <div
+      className="glass-card shimmer"
+      style={{ height: 160, borderRadius: 14 }}
+    />
   );
 }
 
@@ -300,7 +332,11 @@ function StatsBarSkeleton() {
       }}
     >
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="glass-card shimmer" style={{ height: 84, borderRadius: 14 }} />
+        <div
+          key={i}
+          className="glass-card shimmer"
+          style={{ height: 84, borderRadius: 14 }}
+        />
       ))}
     </div>
   );
