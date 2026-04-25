@@ -464,6 +464,26 @@ function ActiveIncidentBanner({ incident }: { incident: LiveWatchIncident }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+const mergeAllIncidents = (data: SitecoreProductStatusEnriched[]) => {
+  const incidentMap = new Map();
+
+  data.forEach(item => {
+    // Add top-level incident
+    if (item.incident) {
+      incidentMap.set(item.incident.id, item.incident);
+    }
+
+    // Add all history incidents
+    if (item.history) {
+      item.history.forEach(h => {
+        incidentMap.set(h.id, h);
+      });
+    }
+  });
+
+  return Array.from(incidentMap.values());
+};
+
 export function SitecoreBreakdown({ products }: Props) {
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
 
@@ -472,8 +492,7 @@ export function SitecoreBreakdown({ products }: Props) {
   const degradedCount = entries.filter((p) => p.status !== "operational").length;
 
   // Collect all active incidents - this is what the user was asking about
-  const activeIncidents = entries
-    .flatMap((p) => (p.incident ? [p.incident] : []))
+  const activeIncidents = mergeAllIncidents(entries)
     .filter((inc, idx, arr) => arr.findIndex((x) => x.id === inc.id) === idx) // deduplicate
     .sort((a, b) => {
       // Sort: critical > major > minor, then by date
