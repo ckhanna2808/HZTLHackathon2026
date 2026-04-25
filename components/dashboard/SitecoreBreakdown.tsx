@@ -19,6 +19,7 @@ import {
   ExternalLink,
   Sparkles,
   Loader2,
+  ArrowDownNarrowWide,
 } from "lucide-react";
 
 interface SitecoreProductStatusEnriched {
@@ -553,6 +554,7 @@ const mergeAllIncidents = (data: SitecoreProductStatusEnriched[]) => {
 export function SitecoreBreakdown({ products }: Props) {
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<"default" | "newest">("default");
 
   useEffect(() => {
     const tick = () => setNowMs(Date.now());
@@ -574,6 +576,9 @@ export function SitecoreBreakdown({ products }: Props) {
   const activeIncidents = mergeAllIncidents(entries)
     .filter((inc, idx, arr) => arr.findIndex((x) => x.id === inc.id) === idx) // deduplicate
     .sort((a, b) => {
+      if (sortOrder === "newest") {
+        return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime();
+      }
       // Sort: critical > major > minor, then by date
       const impactOrder = { critical: 0, major: 1, minor: 2, none: 3 };
       const iA = impactOrder[a.impact as keyof typeof impactOrder] ?? 3;
@@ -700,6 +705,38 @@ export function SitecoreBreakdown({ products }: Props) {
               }}
             />
             Active Events ({activeIncidents.length})
+
+            <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
+              {(["default", "newest"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => setSortOrder(opt)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "2px 6px",
+                    borderRadius: 4,
+                    border: `1px solid ${sortOrder === opt ? "var(--accent-primary)" : "var(--border-subtle)"}`,
+                    background:
+                      sortOrder === opt
+                        ? "var(--accent-primary-dim)"
+                        : "transparent",
+                    color:
+                      sortOrder === opt
+                        ? "var(--accent-primary)"
+                        : "var(--text-muted)",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {opt === "newest" && <ArrowDownNarrowWide size={9} />}
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
           {activeIncidents.map((inc) => (
             <ActiveIncidentBanner key={inc.id} incident={inc} nowMs={nowMs} />

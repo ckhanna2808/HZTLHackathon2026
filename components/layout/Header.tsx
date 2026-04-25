@@ -383,46 +383,7 @@ export function Header({
           </span>
         </div>
 
-        {/* UTC Clock */}
-        <div
-          className="font-mono"
-          style={{
-            fontWeight: 600,
-            color: "var(--text-primary)",
-            background: "var(--bg-glass)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: 6,
-            padding: "4px 10px",
-          }}
-        >
-          {utcTime} <span className="muted text-xs">UTC</span>
-        </div>
 
-        {/* Active incidents badge */}
-        {activeIncidentCount > 0 && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "var(--status-red-dim)",
-              border: "1px solid rgba(239,68,68,0.35)",
-              color: "var(--status-red)",
-            }}
-            className="pill-inline"
-          >
-            <Bell size={12} />
-            <span>{activeIncidentCount} Active</span>
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: "var(--status-red)",
-                animation: "pulse-dot 1.4s ease-in-out infinite",
-              }}
-            />
-          </div>
-        )}
 
         {/* Refresh */}
         <button
