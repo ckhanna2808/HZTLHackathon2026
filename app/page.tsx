@@ -222,7 +222,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Right column — Incident Feed */}
-            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column" }}>
               <IncidentFeed
                 incidents={snapshot?.activeIncidents ?? []}
                 isLoading={isLoading && !snapshot}
