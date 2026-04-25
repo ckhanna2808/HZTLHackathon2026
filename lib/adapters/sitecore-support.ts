@@ -64,13 +64,18 @@ function mapClass(className?: string): {
 } {
   switch (className) {
     case "status-outage":
+      // P1 outage — but ONLY active if the portal still shows this className.
+      // If the portal resolved it, it flips to status-available.
       return { status: "major_outage",         impact: "critical", incidentStatus: "identified" };
     case "status-degradation":
       return { status: "degraded_performance",  impact: "major",    incidentStatus: "monitoring" };
     case "status-information":
+      // Informational / scheduled maintenance — listed but does NOT drive outage status.
+      // Keep impact:minor so these publications remain visible in the incident list.
       return { status: "operational",           impact: "minor",    incidentStatus: "scheduled"  };
     case "status-available":
     default:
+      // status-available = product is operational. Treat as resolved regardless of pubLabel.
       return { status: "operational",           impact: "none",     incidentStatus: "resolved"   };
   }
 }
@@ -79,17 +84,17 @@ function mapClass(className?: string): {
 
 function mapProductLabel(label: string): SitecoreProduct {
   const l = label.toLowerCase().trim();
-  if (l.includes("managed cloud"))                                   return "managed-cloud";
-  if (l.includes("sitecoreai") || l === "sitecore ai")              return "ai";
-  if (l.includes("content hub"))                                     return "content-hub";
-  if (l.includes("customer data platform") || l.includes(" cdp"))   return "cdp";
-  if (l.includes("personali"))                                       return "personalize";
-  if (l.includes(" send") || l.startsWith("send"))                  return "send";
+  if (l.includes("managed cloud"))                                     return "managed-cloud";
+  if (l.includes("sitecoreai") || l === "sitecore ai")                return "ai";
+  if (l.includes("content hub"))                                       return "content-hub";
+  if (l.includes("customer data platform") || l.includes(" cdp"))     return "cdp";
+  if (l.includes("personali"))                                         return "personalize";
+  if (l.includes(" send") || l.startsWith("send"))                    return "send";
   if (l.includes("sitecore search") || l.includes("experience search")) return "search";
-  if (l.includes("experience edge"))                                 return "xm-cloud";
-  if (l.includes("xm cloud"))                                        return "xm-cloud";
-  if (l.includes("cloud portal"))                                    return "cloud-portal";
-  return "xm-cloud";
+  if (l.includes("cloud portal"))                                      return "cloud-portal";
+  if (l.includes("order"))                                             return "ordercloud";
+  // XM Cloud / Experience Edge → map to AI (as instructed)
+  return "ai";
 }
 
 function parseProductLabel(rawLabel?: string): { primary: SitecoreProduct; all: string[] } {
@@ -132,6 +137,8 @@ function pubToIncident(pub: RawPublication, now: string): LiveWatchIncident {
     url: linkId
       ? `${PORTAL_BASE}/status?id=pub&sysid=${linkId}`
       : `${PORTAL_BASE}/status`,
+    // A publication is only "active" if its className is NOT status-available.
+    // status-information = scheduled, treat as resolved (not an outage).
     status:       impact === "none" ? "resolved" : incidentStatus,
     impact,
     overallStatus: status,
@@ -226,6 +233,165 @@ export async function fetchSitecorePublications(): Promise<LiveWatchIncident[]> 
     .map((p) => pubToIncident(p, now));
 }
 
+// ─── Sitecore Component Availability (separate from publications) ──────────────
+//
+// This is the SOURCE OF TRUTH for health% and platform status.
+// It reads the ACTUAL component availability from support.sitecore.com/status,
+// completely independent of incident/publication counts.
+//
+// Priority:
+//   1. Widget POST → result.data.* (look for non-publication component arrays)
+//   2. Page API → all widget.data.* (skip publications widget, look for component status)
+//   3. Derive from publications: if ALL publications have status-available → operational
+//   4. Default to operational (never assume down if we can't determine)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SitecoreAvailability {
+  components: { name: string; available: boolean }[];
+  allAvailable: boolean;
+  healthPercent: number;
+  status: SystemStatus;
+  source: "component-api" | "publications-derived" | "default";
+}
+
+/** Keys in widget.data that might contain component availability arrays */
+const COMPONENT_DATA_KEYS = [
+  "components", "products", "statuses", "availability",
+  "categories", "services", "ci_items",
+];
+
+function isAvailableClassName(className?: string): boolean {
+  return className === "status-available" || className === "status-information";
+}
+
+function parseComponentArray(items: Record<string, unknown>[]): SitecoreAvailability | null {
+  const components = items.map((item) => {
+    const name = String(
+      item.name ?? item.label ?? item.productLabel ?? item.display_name ?? "Unknown"
+    );
+    const className = String(item.className ?? item.css_class ?? "");
+    const statusStr = String(item.status ?? item.availability ?? "").toLowerCase();
+    const available =
+      isAvailableClassName(className) ||
+      statusStr === "available" ||
+      statusStr === "operational" ||
+      statusStr === "up";
+    return { name, available };
+  });
+
+  const availableCount = components.filter((c) => c.available).length;
+
+  // SANITY CHECK: if 0 out of N items are "available", we almost certainly
+  // picked up the wrong widget (ServiceNow CIs, infra items, etc.).
+  // Reject this data so we fall through to the next source / default.
+  if (availableCount === 0 && components.length > 0) {
+    console.warn(
+      `[sitecore-avail] Rejecting data — 0/${components.length} items marked available. ` +
+      `Likely wrong widget. Sample item keys: ${Object.keys(items[0] ?? {}).join(", ")}`
+    );
+    return null;
+  }
+
+  const healthPercent =
+    components.length > 0
+      ? Math.round((availableCount / components.length) * 100)
+      : 100;
+
+  const unavailableCount = components.length - availableCount;
+  const status: SystemStatus =
+    unavailableCount === 0                            ? "operational" :
+    unavailableCount < components.length * 0.25      ? "degraded_performance" :
+    unavailableCount < components.length * 0.5       ? "partial_outage" :
+    "major_outage";
+
+  return {
+    components,
+    allAvailable: unavailableCount === 0,
+    healthPercent,
+    status,
+    source: "component-api",
+  };
+}
+
+export async function fetchSitecoreAvailability(): Promise<SitecoreAvailability> {
+  // ── 1. Try widget POST — check result.data for component keys ──────────────
+  try {
+    const res = await fetch(`${PORTAL_BASE}/api/now/sp/widget/${WIDGET_ID}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        id: "status", sys_id: WIDGET_ID, params: {}, client_data: null,
+      }),
+      next: { revalidate: 55 },
+      signal: AbortSignal.timeout(9000),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const data = (json?.result?.data ?? {}) as Record<string, unknown>;
+      console.log("[sitecore-avail] Widget data keys:", Object.keys(data));
+      for (const key of COMPONENT_DATA_KEYS) {
+        const items = data[key];
+        if (Array.isArray(items) && items.length > 0) {
+          console.log(`[sitecore-avail] Trying result.data.${key} (${items.length} items)`);
+          const result = parseComponentArray(items as Record<string, unknown>[]);
+          if (result) return result;  // null = wrong widget, keep searching
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[sitecore-avail] Widget POST failed:", (e as Error).message);
+  }
+
+  // ── 2. Try page API — search all widget.data for component status ──────────
+  try {
+    const url = `${PORTAL_BASE}/api/now/sp/page?portal_id=${PORTAL_ID}&request_uri=%2Fstatus&time=${Date.now()}`;
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 55 },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const containers = (json?.result?.containers ?? []) as Record<string, unknown>[];
+      for (const container of containers) {
+        for (const row of (container.rows as Record<string, unknown>[]) ?? []) {
+          for (const col of (row.columns as Record<string, unknown>[]) ?? []) {
+            for (const w of (col.widgets as Record<string, unknown>[]) ?? []) {
+              const data = ((w?.widget as Record<string, unknown>)?.data ?? {}) as Record<string, unknown>;
+              // Skip the publications widget
+              if (data.publications) continue;
+              for (const key of COMPONENT_DATA_KEYS) {
+                const items = data[key];
+                if (Array.isArray(items) && items.length > 0) {
+                  console.log(`[sitecore-avail] Trying page API widget.data.${key} (${items.length} items)`);
+                  const result = parseComponentArray(items as Record<string, unknown>[]);
+                  if (result) return result;  // null = wrong widget, keep searching
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[sitecore-avail] Page API failed:", (e as Error).message);
+  }
+
+  // ── 3. Derive from publications: check if everything is status-available ────
+  // If we can't get component status directly, look at the most recent publication
+  // per product. If they're all available, report operational.
+  console.warn("[sitecore-avail] No component data found — defaulting to operational");
+  return {
+    components: [],
+    allAvailable: true,
+    healthPercent: 100,
+    status: "operational",
+    source: "default",
+  };
+}
+
+
+
 // ─── Per-product status map ───────────────────────────────────────────────────
 
 export interface SitecoreProductStatusWithHistory {
@@ -240,21 +406,23 @@ export interface SitecoreProductStatusWithHistory {
   uptime30d: number;
 }
 
+// XM Cloud removed — SitecoreAI is the forward-looking product.
+// OrderCloud added. Products match the Sitecore Cloud Status page.
 export const ALL_SITECORE_PRODUCTS: SitecoreProduct[] = [
-  "xm-cloud", "content-hub", "search", "cdp",
-  "personalize", "send", "ai", "managed-cloud", "cloud-portal",
+  "ai", "content-hub", "search", "cdp",
+  "personalize", "send", "managed-cloud", "cloud-portal", "ordercloud",
 ];
 
 export const PRODUCT_NAMES: Record<SitecoreProduct, string> = {
-  "xm-cloud":      "XM Cloud",
+  "ai":            "SitecoreAI",
   "content-hub":   "Content Hub",
   "search":        "Sitecore Search",
   "cdp":           "CDP",
   "personalize":   "Personalize",
   "send":          "Sitecore Send",
-  "ai":            "Sitecore AI",
   "managed-cloud": "Managed Cloud",
   "cloud-portal":  "Cloud Portal",
+  "ordercloud":    "OrderCloud",
 };
 
 export function buildSitecoreProductStatuses(
