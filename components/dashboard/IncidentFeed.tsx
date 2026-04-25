@@ -4,6 +4,7 @@ import { useState } from "react";
 import { LiveWatchIncident } from "@/lib/types";
 import { IncidentCard } from "./IncidentCard";
 import { ArrowDownUp, Bell, Rss } from "lucide-react";
+import { Reveal } from "@/components/ui/Reveal";
 
 interface Props {
   incidents: LiveWatchIncident[];
@@ -156,7 +157,9 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
           />
         )}
         {active.map((inc, i) => (
-          <IncidentCard key={inc.id} incident={inc} index={i} />
+          <Reveal key={inc.id} delayMs={i * 55}>
+            <IncidentCard incident={inc} index={i} />
+          </Reveal>
         ))}
 
         {/* Resolved */}
@@ -168,7 +171,9 @@ export function IncidentFeed({ incidents, isLoading }: Props) {
               color="var(--status-green)"
             />
             {resolved.map((inc, i) => (
-              <IncidentCard key={inc.id} incident={inc} index={i} />
+              <Reveal key={inc.id} delayMs={i * 55}>
+                <IncidentCard incident={inc} index={i} />
+              </Reveal>
             ))}
           </>
         )}

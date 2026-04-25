@@ -17,7 +17,8 @@ type Props = {
 export function Reveal({
   children,
   once = true,
-  margin = "0px 0px -12% 0px",
+  // Trigger later so the user *sees* the animation while scrolling
+  margin = "0px 0px -30% 0px",
   className,
   delayMs,
 }: Props) {
@@ -53,7 +54,7 @@ export function Reveal({
           }
         }
       },
-      { root: null, rootMargin: margin, threshold: 0.08 }
+      { root: null, rootMargin: margin, threshold: 0.18 }
     );
 
     obs.observe(el);
