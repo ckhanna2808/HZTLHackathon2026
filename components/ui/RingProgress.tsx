@@ -52,6 +52,8 @@ export function RingProgress({
 
   return (
     <div
+      data-component="RingProgress"
+      aria-label={`Ring progress ${label ?? `${clampedValue}%`}`}
       style={{
         position: "relative",
         width: size,

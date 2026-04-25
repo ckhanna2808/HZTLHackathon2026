@@ -53,7 +53,11 @@ export function Sidebar({
   globalHealth,
 }: SidebarProps) {
   return (
-    <aside className="sidebar">
+    <aside
+      className="sidebar"
+      data-component="Sidebar"
+      aria-label="Sidebar navigation"
+    >
       {/* Logo area */}
       <div
         style={{
@@ -79,6 +83,7 @@ export function Sidebar({
           onClick={() => onSelect("all")}
           className={`sidebar-nav-item ${selected === "all" ? "active" : ""}`}
           style={{ width: "100%", border: "none", textAlign: "left" }}
+          aria-label="All platforms"
         >
           <LayoutGrid size={15} />
           <span>All Platforms</span>
@@ -128,6 +133,7 @@ export function Sidebar({
                 onClick={() => onSelect(p.id)}
                 className={`sidebar-nav-item ${isActive ? "active" : ""}`}
                 style={{ width: "100%", border: "none", textAlign: "left" }}
+                aria-label={`Platform ${p.label}`}
               >
                 <span
                   style={{
@@ -161,7 +167,35 @@ export function Sidebar({
           borderTop: "1px solid var(--border-subtle)",
         }}
       >
+        <div
+          style={{
+            padding: "0 16px 10px",
+            fontSize: 16,
 
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            color: "var(--text-muted)",
+            textTransform: "uppercase",
+          }}
+        >
+          Quick Links
+        </div>
+
+        <button
+          className="sidebar-nav-item"
+          style={{ width: "100%", border: "none", textAlign: "left" }}
+          onClick={() => onSelect("incidents")}
+          aria-label="Incidents"
+        >
+          <Bell size={14} />
+          <span>Incidents</span>
+          {activeIncidentCount > 0 && (
+            <ChevronRight
+              size={12}
+              style={{ marginLeft: "auto", color: "var(--text-muted)" }}
+            />
+          )}
+        </button>
 
         {/* Global health score */}
         <div

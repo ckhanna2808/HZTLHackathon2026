@@ -76,6 +76,8 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
   return (
     <div
       className={`glass-card ${cardClass} animate-slide-up`}
+      data-component="PlatformCard"
+      aria-label={`Platform card: ${platform.name}`}
       style={{
         padding: "20px",
         animationDelay: `${animationDelay}ms`,
