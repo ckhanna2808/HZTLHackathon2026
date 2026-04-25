@@ -4,6 +4,10 @@
     {
       "path": "/api/status",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/incident-digest",
+      "schedule": "0 * * * *"
     }
   ]
 }
