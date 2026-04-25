@@ -71,7 +71,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
 
   const lastUpdated = platform.updatedAt
     ? formatDistanceToNow(new Date(platform.updatedAt), { addSuffix: true })
-    : "—";
+    : "-";
 
   return (
     <div
@@ -165,7 +165,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
       >
         <StatCell
           label="Components"
-          value={platform.components.length || "—"}
+          value={platform.components.length || "-"}
         />
         <StatCell
           label="Incidents"
@@ -220,7 +220,7 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
           >
             Components
           </div>
-          {/* Scrollable — shows ALL components, non-operational sorted first */}
+          {/* Scrollable - shows ALL components, non-operational sorted first */}
           <div
             style={{
               maxHeight: 220,

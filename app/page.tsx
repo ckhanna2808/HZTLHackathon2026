@@ -79,7 +79,7 @@ export default function DashboardPage() {
       : (snapshot?.platforms[selectedPlatform as Platform]?.activeIncidents ?? []);
   // ↑ platform-specific tab: use platform.activeIncidents which includes resolved history
 
-  // Badge / header count — always shows only ACTIVE (non-resolved) for the current view
+  // Badge / header count - always shows only ACTIVE (non-resolved) for the current view
   const activeCount = filteredIncidents.filter((i) => i.status !== "resolved").length;
 
   // Global count is only used for the stats bar (always shows totals).
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                 <HealthChart platforms={platforms} />
               )}
 
-              {/* Embeddable Status Badges — code snippets only, no rendered images */}
+              {/* Embeddable Status Badges - code snippets only, no rendered images */}
               {snapshot && (
                 <div className="glass-card" style={{ padding: "18px 20px" }}>
                   <div
@@ -267,7 +267,7 @@ export default function DashboardPage() {
 
             </div>
 
-            {/* Right column — Incident Feed */}
+            {/* Right column - Incident Feed */}
             <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column" }}>
               <IncidentFeed
                 incidents={filteredIncidents}

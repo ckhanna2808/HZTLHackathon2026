@@ -234,7 +234,7 @@ function TimezoneDropdown() {
               lineHeight: 1.4,
             }}
           >
-            Display only — all server data is always in UTC.
+            Display only - all server data is always in UTC.
           </div>
         </div>
       )}
@@ -271,7 +271,7 @@ export function Header({
         if (diff < 60) return `${diff}s ago`;
         return `${Math.floor(diff / 60)}m ago`;
       })()
-    : "—";
+    : "-";
 
   return (
     <header className="top-header">

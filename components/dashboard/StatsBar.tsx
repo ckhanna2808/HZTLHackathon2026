@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function StatsBar({ stats, activeIncidentCount }: Props) {
-  // Live clock — ticks every second so the "Next Poll" countdown actually counts down.
+  // Live clock - ticks every second so the "Next Poll" countdown actually counts down.
   // Without this, Date.now() is evaluated once at render and never updates.
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -59,7 +59,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
       value:
         stats.avgResolutionMinutes != null
           ? `${stats.avgResolutionMinutes}m`
-          : "—",
+          : "-",
       sub: "MTTR",
       color: "var(--accent-primary)",
     },
@@ -79,7 +79,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
       icon: <Clock size={15} />,
       label: "Next Poll",
       // secondsToNextPoll is recomputed every render (tick forces it every 1s)
-      value: secondsToNextPoll !== null ? `${secondsToNextPoll}s` : "—",
+      value: secondsToNextPoll !== null ? `${secondsToNextPoll}s` : "-",
       sub: "Polling interval",
       color:
         secondsToNextPoll !== null && secondsToNextPoll <= 10
@@ -88,7 +88,7 @@ export function StatsBar({ stats, activeIncidentCount }: Props) {
     },
   ];
 
-  // Suppress unused-variable lint for tick — it's only used to force re-renders
+  // Suppress unused-variable lint for tick - it's only used to force re-renders
   void tick;
 
   return (

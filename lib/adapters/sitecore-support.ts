@@ -1,5 +1,5 @@
 /**
- * Sitecore Support Portal — Widget API Adapter
+ * Sitecore Support Portal - Widget API Adapter
  *
  * The publications list is served by ServiceNow widget sys_id c03fc483c3e13250f2c0da42b4013115
  * which lives inside the /status page for portal 89ee320c1b1d7810ed946574604bcb92.
@@ -55,7 +55,7 @@ interface RawPublication {
   };
 }
 
-// ─── Priority mapping (from className — most reliable field) ─────────────────
+// ─── Priority mapping (from className - most reliable field) ─────────────────
 
 function mapClass(className?: string): {
   status: SystemStatus;
@@ -64,13 +64,13 @@ function mapClass(className?: string): {
 } {
   switch (className) {
     case "status-outage":
-      // P1 outage — but ONLY active if the portal still shows this className.
+      // P1 outage - but ONLY active if the portal still shows this className.
       // If the portal resolved it, it flips to status-available.
       return { status: "major_outage",         impact: "critical", incidentStatus: "identified" };
     case "status-degradation":
       return { status: "degraded_performance",  impact: "major",    incidentStatus: "monitoring" };
     case "status-information":
-      // Informational / scheduled maintenance — listed but does NOT drive outage status.
+      // Informational / scheduled maintenance - listed but does NOT drive outage status.
       // Keep impact:minor so these publications remain visible in the incident list.
       return { status: "operational",           impact: "minor",    incidentStatus: "scheduled"  };
     case "status-available":
@@ -180,7 +180,7 @@ async function fetchViaWidget(): Promise<RawPublication[]> {
   return pubs;
 }
 
-// ─── Fetch via page API (fallback — traverses containers) ────────────────────
+// ─── Fetch via page API (fallback - traverses containers) ────────────────────
 
 async function fetchViaPageAPI(): Promise<RawPublication[]> {
   const url = `${PORTAL_BASE}/api/now/sp/page?portal_id=${PORTAL_ID}&request_uri=%2Fstatus&time=${Date.now()}`;
@@ -286,7 +286,7 @@ function parseComponentArray(items: Record<string, unknown>[]): SitecoreAvailabi
   // Reject this data so we fall through to the next source / default.
   if (availableCount === 0 && components.length > 0) {
     console.warn(
-      `[sitecore-avail] Rejecting data — 0/${components.length} items marked available. ` +
+      `[sitecore-avail] Rejecting data - 0/${components.length} items marked available. ` +
       `Likely wrong widget. Sample item keys: ${Object.keys(items[0] ?? {}).join(", ")}`
     );
     return null;
@@ -314,7 +314,7 @@ function parseComponentArray(items: Record<string, unknown>[]): SitecoreAvailabi
 }
 
 export async function fetchSitecoreAvailability(): Promise<SitecoreAvailability> {
-  // ── 1. Try widget POST — check result.data for component keys ──────────────
+  // ── 1. Try widget POST - check result.data for component keys ──────────────
   try {
     const res = await fetch(`${PORTAL_BASE}/api/now/sp/widget/${WIDGET_ID}`, {
       method: "POST",
@@ -342,7 +342,7 @@ export async function fetchSitecoreAvailability(): Promise<SitecoreAvailability>
     console.warn("[sitecore-avail] Widget POST failed:", (e as Error).message);
   }
 
-  // ── 2. Try page API — search all widget.data for component status ──────────
+  // ── 2. Try page API - search all widget.data for component status ──────────
   try {
     const url = `${PORTAL_BASE}/api/now/sp/page?portal_id=${PORTAL_ID}&request_uri=%2Fstatus&time=${Date.now()}`;
     const res = await fetch(url, {
@@ -380,7 +380,7 @@ export async function fetchSitecoreAvailability(): Promise<SitecoreAvailability>
   // ── 3. Derive from publications: check if everything is status-available ────
   // If we can't get component status directly, look at the most recent publication
   // per product. If they're all available, report operational.
-  console.warn("[sitecore-avail] No component data found — defaulting to operational");
+  console.warn("[sitecore-avail] No component data found - defaulting to operational");
   return {
     components: [],
     allAvailable: true,
@@ -406,7 +406,7 @@ export interface SitecoreProductStatusWithHistory {
   uptime30d: number;
 }
 
-// XM Cloud removed — SitecoreAI is the forward-looking product.
+// XM Cloud removed - SitecoreAI is the forward-looking product.
 // OrderCloud added. Products match the Sitecore Cloud Status page.
 export const ALL_SITECORE_PRODUCTS: SitecoreProduct[] = [
   "ai", "content-hub", "search", "cdp",

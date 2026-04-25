@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "HZTL LiveWatch — Always Watching. Always Alert.",
+  title: "HZTL LiveWatch - Always Watching. Always Alert.",
   description:
     "Real-time incident monitoring dashboard for Vercel, Netlify, GitHub, Cloudflare, npm and the full Sitecore product suite.",
   keywords: ["incident monitoring", "status dashboard", "Sitecore", "Vercel", "DevOps"],
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
-        {/* Inline script to apply theme before first paint — prevents flash */}
+        {/* Inline script to apply theme before first paint - prevents flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

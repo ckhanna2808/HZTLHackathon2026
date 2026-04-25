@@ -15,8 +15,8 @@ export type DisplayTimezone = "UTC" | "IST" | "GST" | "EST";
 /** Maps our display label → IANA timezone string used by Intl.DateTimeFormat */
 export const TZ_IANA: Record<DisplayTimezone, string> = {
   UTC: "UTC",
-  IST: "Asia/Kolkata",     // UTC +5:30 — India Standard Time
-  GST: "Asia/Dubai",       // UTC +4:00 — Gulf Standard Time
+  IST: "Asia/Kolkata",     // UTC +5:30 - India Standard Time
+  GST: "Asia/Dubai",       // UTC +4:00 - Gulf Standard Time
   EST: "America/New_York", // UTC -5:00 (winter) / -4:00 EDT (summer)
 };
 
@@ -25,10 +25,10 @@ export const TZ_CYCLE: DisplayTimezone[] = ["UTC", "IST", "GST", "EST"];
 
 /** Human-readable labels for the dropdown */
 export const TZ_LABELS: Record<DisplayTimezone, string> = {
-  UTC: "UTC — Coordinated Universal Time",
-  IST: "IST — India Standard Time (+5:30)",
-  GST: "GST — Gulf Standard Time (+4:00)",
-  EST: "EST — Eastern Time (−5:00 / −4:00)",
+  UTC: "UTC - Coordinated Universal Time",
+  IST: "IST - India Standard Time (+5:30)",
+  GST: "GST - Gulf Standard Time (+4:00)",
+  EST: "EST - Eastern Time (−5:00 / −4:00)",
 };
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -101,9 +101,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (storedTz && TZ_CYCLE.includes(storedTz)) {
         setDisplayTz(storedTz);
       }
-      // If nothing stored, default stays "UTC" — safest default for a monitoring tool
+      // If nothing stored, default stays "UTC" - safest default for a monitoring tool
     } catch {
-      // localStorage unavailable (SSR / private mode edge case) — use defaults
+      // localStorage unavailable (SSR / private mode edge case) - use defaults
     }
     setMounted(true);
   }, []);

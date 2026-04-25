@@ -60,7 +60,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 /** Returns the CSS variable for a platform's brand colour.
- *  Values are defined per-theme in globals.css — no JS theme check needed.
+ *  Values are defined per-theme in globals.css - no JS theme check needed.
  */
 function platformColorVar(source: string): string {
   return `var(--platform-${source}, var(--text-secondary))`;
