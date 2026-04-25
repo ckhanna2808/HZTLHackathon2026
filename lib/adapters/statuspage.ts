@@ -123,6 +123,7 @@ export async function fetchStatuspagePlatform(
   const now = new Date().toISOString();
 
   try {
+    // ── Primary: summary.json — platform status + currently active incidents ──
     const res = await fetch(`${baseUrl}/summary.json`, {
       next: { revalidate: 55 },
       headers: { Accept: "application/json" },
@@ -132,6 +133,29 @@ export async function fetchStatuspagePlatform(
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const data: StatuspageResponse = await res.json();
+
+    // ── Secondary: incidents.json — full history including resolved ────────────
+    // This gives us resolved incidents from the past ~25 entries so the
+    // per-platform incident feed shows recent history, not just active ones.
+    let allRawIncidents: StatuspageIncident[] = [...data.incidents];
+    try {
+      const histRes = await fetch(`${baseUrl}/incidents.json`, {
+        next: { revalidate: 55 },
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (histRes.ok) {
+        const histData = await histRes.json();
+        const histIncidents: StatuspageIncident[] = histData.incidents ?? [];
+        // Merge: keep active from summary, add resolved from history (dedup by id)
+        const activeIds = new Set(data.incidents.map((i) => i.id));
+        const resolvedOnly = histIncidents.filter((i) => !activeIds.has(i.id));
+        allRawIncidents = [...data.incidents, ...resolvedOnly];
+      }
+    } catch {
+      // History fetch is best-effort — don't fail the whole platform fetch
+      console.warn(`[statuspage] Could not fetch incident history for ${platformId}`);
+    }
 
     // Filter non-group components
     const components: ComponentStatus[] = data.components
@@ -143,8 +167,8 @@ export async function fetchStatuspagePlatform(
         group: c.group_id ?? undefined,
       }));
 
-    // Map active incidents
-    const activeIncidents: LiveWatchIncident[] = data.incidents.map(
+    // Map ALL incidents (active + resolved) — resolved ones get status:"resolved"
+    const activeIncidents: LiveWatchIncident[] = allRawIncidents.map(
       (inc: StatuspageIncident) => ({
         id: `${platformId}-${inc.id}`,
         source: platformId,
@@ -176,7 +200,7 @@ export async function fetchStatuspagePlatform(
       indicator: data.status.indicator,
       description: data.status.description,
       updatedAt: data.page.updated_at,
-      activeIncidents,
+      activeIncidents,   // includes resolved — filtered per-view in page.tsx
       components,
       healthPercent: calcHealthPercent(data.status.indicator, data.incidents),
       lastChecked: now,
@@ -197,6 +221,7 @@ export async function fetchStatuspagePlatform(
     };
   }
 }
+
 
 export async function fetchAllStatuspagePlatforms(): Promise<PlatformStatus[]> {
   return Promise.all(

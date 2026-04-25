@@ -81,15 +81,15 @@ const PRIORITY_LABEL: Record<string, { label: string; color: string; bg: string;
 };
 
 const PRODUCT_ABBR: Record<string, string> = {
-  "xm-cloud": "XMC",
-  "content-hub": "CH",
-  "search": "SRH",
-  "cdp": "CDP",
-  "personalize": "PRS",
-  "send": "SND",
-  "ai": "AI",
+  "ai":            "AI",
+  "content-hub":   "CH",
+  "search":        "SRH",
+  "cdp":           "CDP",
+  "personalize":   "PRS",
+  "send":          "SND",
   "managed-cloud": "MCS",
-  "cloud-portal": "CLD",
+  "cloud-portal":  "CLD",
+  "ordercloud":    "ORC",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -344,7 +344,7 @@ export function SitecoreBreakdown({ products }: Props) {
             Sitecore Product Suite
           </div>
           <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>
-            9 products · Live incidents · 30-day history
+            {entries.length} products · Live incidents · 30-day history
           </div>
         </div>
         {/* Status badge */}
@@ -546,7 +546,7 @@ export function SitecoreBreakdown({ products }: Props) {
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
         <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
-          Source: support.sitecore.com/status · auto-refreshed every 30s
+          Source: support.sitecore.com/status · auto-refreshed every 60s
         </span>
         <a
           href="https://support.sitecore.com/status"

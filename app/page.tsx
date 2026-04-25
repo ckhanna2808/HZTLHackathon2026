@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import useSWR from "swr";
-import { LiveWatchSnapshot } from "@/lib/types";
+import { LiveWatchSnapshot, Platform } from "@/lib/types";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { StatsBar } from "@/components/dashboard/StatsBar";
@@ -30,9 +30,13 @@ export default function DashboardPage() {
     isValidating,
     mutate,
   } = useSWR<LiveWatchSnapshot>("/api/status", fetcher, {
-    refreshInterval: 30_000,
-    revalidateOnFocus: true,
-    keepPreviousData: true,
+    refreshInterval: 60_000,          // poll every 60s (matches API cache)
+    revalidateOnFocus: false,         // ← STOP: was causing flicker on tab switch
+    revalidateOnReconnect: true,
+    dedupingInterval: 55_000,         // don't double-fetch within 55s window
+    keepPreviousData: true,           // always show last good data while fetching
+    errorRetryCount: 3,
+    errorRetryInterval: 5_000,
   });
 
   const handleRefresh = useCallback(() => {
@@ -62,7 +66,24 @@ export default function DashboardPage() {
         )
       : 100;
 
-  const activeCount = snapshot?.stats.activeIncidentCount ?? 0;
+  // ─── Incident feed: scoped to the selected platform tab ──────────────────
+  // • "all" → only ACTIVE incidents across all platforms (no resolved clutter)
+  // • specific platform tab → ALL incidents for that platform including resolved
+  //   history, so users can see what was resolved earlier today/this week.
+  const allActiveIncidents = snapshot?.activeIncidents ?? [];
+  const filteredIncidents =
+    selectedPlatform === "all"
+      ? allActiveIncidents   // global: active only
+      : selectedPlatform === "sitecore"
+      ? allActiveIncidents.filter((i) => i.source === "sitecore")  // sitecore active pubs
+      : (snapshot?.platforms[selectedPlatform as Platform]?.activeIncidents ?? []);
+  // ↑ platform-specific tab: use platform.activeIncidents which includes resolved history
+
+  // Badge / header count — always shows only ACTIVE (non-resolved) for the current view
+  const activeCount = filteredIncidents.filter((i) => i.status !== "resolved").length;
+
+  // Global count is only used for the stats bar (always shows totals).
+  const globalActiveCount = snapshot?.stats.activeIncidentCount ?? 0;
 
   return (
     <div className="app-shell">
@@ -88,7 +109,7 @@ export default function DashboardPage() {
         {/* Page content */}
         <main className="page-content">
           {/* Stats bar */}
-          {snapshot && <StatsBar stats={snapshot.stats} />}
+          {snapshot && <StatsBar stats={snapshot.stats} activeIncidentCount={activeCount} />}
           {isLoading && !snapshot && <StatsBarSkeleton />}
 
           {/* Main dashboard layout */}
@@ -222,9 +243,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Right column — Incident Feed */}
-            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ position: "sticky", top: 80, maxHeight: "calc(100vh - 100px)", overflow: "auto", display: "flex", flexDirection: "column" }}>
               <IncidentFeed
-                incidents={snapshot?.activeIncidents ?? []}
+                incidents={filteredIncidents}
                 isLoading={isLoading && !snapshot}
               />
             </div>
