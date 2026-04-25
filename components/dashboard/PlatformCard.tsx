@@ -205,9 +205,6 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
         <div
           style={{
             marginTop: 12,
-            display: "flex",
-            flexDirection: "column",
-            gap: 4,
             animation: "slide-up 0.2s ease-out both",
           }}
           onClick={(e) => e.stopPropagation()}
@@ -219,49 +216,67 @@ export function PlatformCard({ platform, animationDelay = 0 }: Props) {
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               color: "var(--text-muted)",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             Components
           </div>
-          {platform.components.slice(0, 12).map((c) => {
-            const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
-            return (
-              <div
-                key={c.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "4px 8px",
-                  borderRadius: 6,
-                  background: "var(--bg-glass)",
-                  fontSize: 12,
-                }}
-              >
-                <span
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: compColor,
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ flex: 1, color: "var(--text-secondary)" }}>{c.name}</span>
-                <span style={{ fontSize: 10, color: compColor, fontWeight: 600 }}>
-                  {STATUS_LABEL[c.status]}
-                </span>
-              </div>
-            );
-          })}
-          {platform.components.length > 12 && (
-            <div style={{ fontSize: 11, color: "var(--text-muted)", paddingLeft: 8 }}>
-              +{platform.components.length - 12} more components
-            </div>
-          )}
+          {/* Scrollable — shows ALL components, non-operational sorted first */}
+          <div
+            style={{
+              maxHeight: 220,
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+              paddingRight: 2,
+            }}
+          >
+            {[...platform.components]
+              .sort((a, b) => {
+                // Non-operational first
+                const order = { major_outage: 0, partial_outage: 1, degraded_performance: 2, operational: 3, unknown: 4 };
+                return (order[a.status] ?? 4) - (order[b.status] ?? 4);
+              })
+              .map((c) => {
+                const compColor = STATUS_COLOR[c.status] ?? STATUS_COLOR.unknown;
+                return (
+                  <div
+                    key={c.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "4px 8px",
+                      borderRadius: 6,
+                      background: "var(--bg-glass)",
+                      fontSize: 12,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        background: compColor,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span style={{ flex: 1, color: "var(--text-secondary)" }}>{c.name}</span>
+                    <span style={{ fontSize: 10, color: compColor, fontWeight: 600 }}>
+                      {STATUS_LABEL[c.status]}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, textAlign: "right" }}>
+            {platform.components.length} components total
+          </div>
         </div>
       )}
+
 
       {/* Expand toggle */}
       <div
