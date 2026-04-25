@@ -411,7 +411,6 @@ function ActiveIncidentBanner({ incident }: { incident: LiveWatchIncident }) {
               }}
             >
               <Sparkles size={9} />
-              Summary
             </div>
 
             {summary.status === "loading" && (
